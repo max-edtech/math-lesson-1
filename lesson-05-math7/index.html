@@ -2,193 +2,151 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>七年級數學 | 方程式實戰工具箱 (Final Fix)</title>
+    <title>七年級數學 | 方程式完全體</title>
     <style>
-        :root { --primary: #3498db; --danger: #e74c3c; --success: #2ecc71; --dark: #2c3e50; --bg: #f5f7fa; }
+        :root { --primary: #2980b9; --danger: #c0392b; --success: #27ae60; --dark: #2c3e50; --bg: #ecf0f1; }
         body { font-family: 'Segoe UI', '微軟正黑體', sans-serif; background: var(--bg); margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
         
-        .brand-watermark { position: fixed; bottom: 20px; right: 20px; background: rgba(26, 42, 108, 0.8); color: white; padding: 8px 15px; border-radius: 50px; font-size: 12px; pointer-events: none; z-index: 1000; }
-        
-        /* 導航頁籤 */
-        .tabs { display: flex; width: 100%; background: white; padding: 15px 0; justify-content: center; gap: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        .tab-btn { background: #eee; color: #555; border: none; padding: 10px 25px; cursor: pointer; font-size: 1rem; border-radius: 50px; font-weight: bold; transition: 0.2s; }
+        .brand-watermark { position: fixed; bottom: 20px; right: 20px; background: rgba(26, 42, 108, 0.8); color: white; padding: 8px 15px; border-radius: 50px; font-size: 12px; pointer-events: none; z-index: 999; }
+        .tabs { display: flex; width: 100%; background: white; padding: 15px 0; justify-content: center; gap: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .tab-btn { background: #f0f2f5; color: #7f8c8d; border: none; padding: 10px 25px; cursor: pointer; font-size: 1rem; border-radius: 50px; font-weight: bold; transition: 0.3s; }
         .tab-btn.active { background: var(--dark); color: white; transform: scale(1.05); }
 
-        .container { width: 95%; max-width: 900px; background: white; margin-top: 20px; border-radius: 15px; padding: 30px; display: none; box-shadow: 0 5px 20px rgba(0,0,0,0.05); }
+        .container { width: 95%; max-width: 900px; background: white; margin-top: 30px; border-radius: 20px; padding: 30px; display: none; min-height: 500px; }
         .container.active { display: block; animation: fadeIn 0.3s; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        h2 { margin-top: 0; color: var(--dark); border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        h2 { margin-top: 0; border-left: 5px solid var(--primary); padding-left: 15px; color: var(--dark); }
 
-        /* --- 1. 天平系統 (絕對穩固版) --- */
+        /* --- 天平 (位置上移修正) --- */
         .balance-wrapper {
-            position: relative;
-            width: 100%;
-            height: 320px; /* 固定高度 */
-            background: #fdfdfd;
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            margin-top: 20px;
-            overflow: hidden;
+            position: relative; width: 100%; height: 350px; 
+            background: #fbfbfb; border: 1px solid #ddd; border-radius: 10px; margin-top: 20px; overflow: hidden;
         }
-
-        /* 支點：永遠在畫面正中央底部 */
+        /* 支點上移：bottom 從 20px 改為 50px */
         .pivot {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 0;
-            height: 0;
-            border-left: 30px solid transparent;
-            border-right: 30px solid transparent;
-            border-bottom: 60px solid var(--dark);
-            z-index: 2;
+            position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%);
+            width: 0; height: 0; border-left: 30px solid transparent; border-right: 30px solid transparent; border-bottom: 60px solid var(--dark); z-index: 2;
         }
-
-        /* 橫桿容器：包含橫桿、線、盤子 */
-        /* 這是旋轉的核心，中心點必須對準支點尖端 */
+        /* 橫桿上移：bottom 對應支點尖端 (60+60=120) */
         .beam-container {
-            position: absolute;
-            width: 500px;
-            height: 10px;
-            background: var(--dark);
-            border-radius: 5px;
-            
-            /* 定位：支點高度是60px，底部留20px，所以尖端在 bottom:80px */
-            bottom: 80px; 
-            left: 50%;
-            margin-left: -250px; /* 寬度的一半，讓它置中 */
-            
-            /* 旋轉設定 */
-            transform-origin: 50% 50%; /* 繞著正中心旋轉 */
-            transition: transform 0.8s cubic-bezier(0.68, -0.55, 0.27, 1.55); /* 彈性特效 */
-            z-index: 3;
+            position: absolute; width: 500px; height: 10px; background: var(--dark); border-radius: 5px;
+            bottom: 120px; left: 50%; margin-left: -250px;
+            transform-origin: 50% 50%; transition: transform 0.8s cubic-bezier(0.68, -0.55, 0.27, 1.55); z-index: 3;
         }
-
-        /* 旋轉狀態 */
-        /* 左邊變輕 -> 左邊往上翹 -> 順時針旋轉 (+) */
-        .beam-container.tilt-cw { transform: rotate(15deg); } 
-        /* 右邊變輕 -> 右邊往上翹 -> 逆時針旋轉 (-) */
-        .beam-container.tilt-ccw { transform: rotate(-15deg); }
-
-        /* 盤子連接線 */
+        .beam-container.tilt-cw { transform: rotate(15deg); }
         .string { width: 4px; height: 80px; background: #bdc3c7; position: absolute; top: 10px; }
-        .string.left { left: 20px; }
-        .string.right { right: 20px; }
-
-        /* 托盤 */
+        .string.left { left: 20px; } .string.right { right: 20px; }
         .pan {
-            width: 130px; height: 100px;
-            border: 4px solid var(--dark); border-top: none;
-            background: rgba(255,255,255,0.9);
-            position: absolute;
-            top: 80px; /* 線的長度 */
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex; flex-wrap: wrap-reverse; align-content: flex-start; justify-content: center; padding: 5px;
-            box-sizing: border-box;
+            width: 130px; height: 100px; border: 4px solid var(--dark); border-top: none;
+            background: rgba(255,255,255,0.9); position: absolute; top: 80px; left: 50%; transform: translateX(-50%);
+            display: flex; flex-wrap: wrap-reverse; justify-content: center; align-content: flex-start; padding: 5px;
         }
+        .block-x { width: 30px; height: 30px; background: var(--danger); color: white; margin: 2px; display: flex; align-items: center; justify-content: center; font-weight: bold; border-radius: 4px; }
+        .block-1 { width: 22px; height: 22px; background: var(--primary); color: white; margin: 2px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; }
+        .vanish { opacity: 0; transform: scale(0); transition: 0.5s; }
 
-        /* 積木元件 */
-        .block-x { width: 30px; height: 30px; background: var(--danger); color: white; margin: 2px; display: flex; align-items: center; justify-content: center; font-weight: bold; border-radius: 4px; border: 1px solid #c0392b; }
-        .block-1 { width: 22px; height: 22px; background: var(--primary); color: white; margin: 2px; border-radius: 50%; font-size: 11px; display: flex; align-items: center; justify-content: center; border: 1px solid #2980b9; transition: 0.3s; }
-        .vanish { transform: scale(0); opacity: 0; }
-
-        /* --- 2. 分數陷阱區 --- */
-        .frac-display { font-size: 2.2rem; text-align: center; margin: 30px 0; font-family: monospace; font-weight: bold; color: var(--dark); }
-        .step-box { display: flex; justify-content: center; gap: 15px; margin-top: 20px; min-height: 60px; align-items: center; opacity: 0; transition: 0.5s; }
-        .step-el { background: #fff; border: 2px solid #ccc; padding: 10px 20px; border-radius: 10px; font-weight: bold; }
-        .step-el.wrong { border-color: var(--danger); background: #fce4e4; color: var(--danger); }
-        .step-el.correct { border-color: var(--success); background: #e8f8f5; color: var(--success); transform: scale(1.1); }
-
-        /* --- 3. 題意翻譯機 --- */
+        /* --- 複雜分數 (新版) --- */
+        .complex-frac-box { font-size: 1.8rem; text-align: center; margin: 30px 0; font-family: 'Times New Roman', serif; }
+        .frac { display: inline-block; vertical-align: middle; text-align: center; }
+        .frac .top { border-bottom: 2px solid black; display: block; padding: 0 5px; }
+        .frac .btm { display: block; padding: 2px 0; }
+        
+        .process-flow { display: flex; flex-direction: column; gap: 20px; align-items: center; margin-top: 20px; }
+        .step-row { 
+            background: #fff; border: 2px solid #eee; padding: 15px 30px; border-radius: 10px; 
+            font-size: 1.5rem; font-weight: bold; width: 80%; text-align: center;
+            opacity: 0.3; transition: 0.5s; transform: translateY(10px);
+        }
+        .step-row.active { opacity: 1; transform: translateY(0); border-color: var(--primary); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .highlight-red { color: var(--danger); font-weight: bold; }
+        
+        /* --- 翻譯機 --- */
         .wp-box { background: #fffbe6; padding: 20px; border-left: 6px solid #f1c40f; font-size: 1.4rem; line-height: 1.8; border-radius: 8px; }
-        .key-text { border-bottom: 3px solid #ccc; cursor: pointer; padding: 0 4px; transition: 0.2s; }
+        .key-text { border-bottom: 3px solid #ccc; cursor: pointer; padding: 0 4px; }
         .key-text:hover { background: rgba(0,0,0,0.05); }
         .key-text.filled { background: var(--success); color: white; border-color: transparent; border-radius: 4px; }
-        
-        .slot-row { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; align-items: center; background: var(--dark); padding: 15px; border-radius: 10px; color: white; }
-        .slot { width: 60px; height: 45px; border: 2px dashed #7f8c8d; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.1); font-size: 1.2rem; cursor: pointer; }
+        .slot-row { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; background: var(--dark); padding: 15px; border-radius: 10px; color: white; align-items: center; }
+        .slot { width: 60px; height: 45px; border: 2px dashed #7f8c8d; display: flex; align-items: center; justify-content: center; cursor: pointer; background: rgba(255,255,255,0.1); }
         .slot.filled { background: white; color: var(--dark); border-style: solid; }
 
-        /* 按鈕樣式 */
         .action-btn { padding: 10px 20px; border: none; border-radius: 5px; font-size: 1rem; cursor: pointer; font-weight: bold; margin: 5px; color: white; transition: 0.2s; }
-        .action-btn:active { transform: scale(0.95); }
-        .btn-r { background: var(--danger); }
-        .btn-b { background: var(--primary); }
-        .btn-g { background: var(--success); }
-        .btn-y { background: #f39c12; color: #333; }
+        .btn-r { background: var(--danger); } .btn-g { background: var(--success); } .btn-b { background: var(--primary); } .btn-y { background: #f39c12; color: #333; }
     </style>
 </head>
 <body>
 
     <div class="tabs">
         <button class="tab-btn active" onclick="switchTab('balance')">⚖️ 天平 (等量公理)</button>
-        <button class="tab-btn" onclick="switchTab('fraction')">💣 分數 (同乘陷阱)</button>
+        <button class="tab-btn" onclick="switchTab('fraction')">💣 複雜分數 (去分母)</button>
         <button class="tab-btn" onclick="switchTab('word')">📝 翻譯機 (應用題)</button>
     </div>
 
     <div id="balance" class="container active">
-        <h2>等量公理：移項法則的真相</h2>
+        <h2>等量公理：移項法則</h2>
         <div style="text-align:center; font-size:2rem; font-weight:bold; margin-bottom:10px;">
             <span id="eq-l">2x + 6</span> = <span id="eq-r">10</span>
         </div>
-
         <div class="balance-wrapper">
             <div class="beam-container" id="beam">
-                <div class="string left">
-                    <div class="pan" id="pan-left"></div>
-                </div>
-                <div class="string right">
-                    <div class="pan" id="pan-right"></div>
-                </div>
+                <div class="string left"><div class="pan" id="pan-left"></div></div>
+                <div class="string right"><div class="pan" id="pan-right"></div></div>
             </div>
             <div class="pivot"></div>
         </div>
-
         <div style="text-align:center; margin-top:20px;">
-            <button class="action-btn btn-r" onclick="wrongMove()">❌ 錯誤：只拿左邊 6</button>
-            <button class="action-btn btn-g" onclick="correctMove()">⭕ 正確：兩邊同時拿 6</button>
+            <button class="action-btn btn-r" onclick="wrongMove()">❌ 錯誤：只減左邊</button>
+            <button class="action-btn btn-g" onclick="correctMove()">⭕ 正確：同時減 6</button>
             <button class="action-btn btn-y" onclick="initBalance()">🔄 重置</button>
         </div>
-        <p id="bal-msg" style="text-align:center; font-weight:bold; height:30px; font-size:1.2rem; margin-top:10px;"></p>
+        <p id="bal-msg" style="text-align:center; font-weight:bold; height:30px; font-size:1.2rem; color:var(--danger);"></p>
     </div>
 
     <div id="fraction" class="container">
-        <h2>分數方程式：被遺忘的常數</h2>
-        <p style="color:#666;">題目：同乘 3 之後，那個 2 會發生什麼事？</p>
+        <h2>分數方程式：去分母與括號陷阱</h2>
+        <p style="color:#666; text-align:center;">經典考題：兩邊同時乘以最小公倍數 (LCM)</p>
         
-        <div class="frac-display">
-            <span style="border-bottom:3px solid black; display:inline-block; line-height:0.8; padding:0 5px;">
-                <span style="font-size:1.5rem; display:block; padding-bottom:5px;">x</span>
-                <span style="font-size:1.5rem; display:block;">3</span>
-            </span>
-             + 2 = 5
+        <div class="complex-frac-box">
+            <span class="frac"><span class="top">2x + 5</span><span class="btm">3</span></span>
+            <span style="margin:0 10px;">-</span>
+            <span class="frac"><span class="top">x - 2</span><span class="btm">2</span></span>
+            <span style="margin:0 10px;">=</span>
+            <span>2</span>
         </div>
 
         <div style="text-align:center;">
-            <button class="action-btn btn-r" onclick="showFrac(false)">💀 常犯錯誤</button>
-            <button class="action-btn btn-g" onclick="showFrac(true)">✨ 正確解法</button>
+            <button class="action-btn btn-b" onclick="fracStep(1)">Step 1: 找 LCM 同乘</button>
+            <button class="action-btn btn-b" onclick="fracStep(2)">Step 2: 約分與括號</button>
+            <button class="action-btn btn-r" onclick="fracStep(3)">Step 3: 拆括號 (陷阱)</button>
+            <button class="action-btn btn-y" onclick="fracReset()">重置</button>
         </div>
 
-        <div id="frac-step" class="step-box">
-            <div class="step-el">x</div>
-            <div class="step-el" id="frac-const">+ 2</div>
-            <div class="step-el">= 15</div>
+        <div class="process-flow">
+            <div id="fs1" class="step-row">
+                <span style="color:blue;">6</span> × <span class="frac" style="font-size:1rem;"><span class="top">...</span><span class="btm">3</span></span> 
+                - <span style="color:blue;">6</span> × <span class="frac" style="font-size:1rem;"><span class="top">...</span><span class="btm">2</span></span> 
+                = <span style="color:blue;">6</span> × 2
+                <div style="font-size:0.9rem; color:#666; margin-top:5px;">重點：每一項都要乘！包括常數 2！</div>
+            </div>
+            <div id="fs2" class="step-row">
+                2 ( 2x + 5 ) - 3 <span class="highlight-red">( x - 2 )</span> = 12
+                <div style="font-size:0.9rem; color:#666; margin-top:5px;">重點：分子是個團體，要加<b style="color:red">括號</b>保護！</div>
+            </div>
+            <div id="fs3" class="step-row">
+                4x + 10 - 3x <span class="highlight-red">+ 6</span> = 12
+                <div style="font-size:0.9rem; color:#666; margin-top:5px;">陷阱：負負得正！ -3 乘 -2 變成 +6</div>
+            </div>
         </div>
-        <div id="frac-msg" style="text-align:center; font-weight:bold; margin-top:15px; font-size:1.2rem;"></div>
     </div>
 
     <div id="word" class="container">
-        <h2>應用題翻譯機</h2>
+        <h2>題意翻譯機</h2>
         <div class="wp-box">
             題目：爸爸的年齡 <span class="key-text" onclick="fillSlot(0, '=')">是</span> 
             兒子的 <span class="key-text" onclick="fillSlot(1, '3x')">3倍</span> 
             <span class="key-text" onclick="fillSlot(2, '-')">少</span> 5 歲。
             <br><span style="font-size:0.9rem; color:#666;">(設兒子 x，爸爸 y)</span>
         </div>
-
         <div class="slot-row">
             <span style="font-size:1.5rem; font-weight:bold;">y</span>
             <div class="slot" id="s0" onclick="clearSlot(0)"></div>
@@ -196,15 +154,14 @@
             <div class="slot" id="s2" onclick="clearSlot(2)"></div>
             <div class="slot filled" style="border:none;">5</div>
         </div>
-
-        <div style="margin-top:20px; display:flex; gap:10px; justify-content:center;">
+        <div style="margin-top:20px; text-align:center;">
             <button class="action-btn btn-b" onclick="manualFill('+')">+</button>
             <button class="action-btn btn-b" onclick="manualFill('-')">-</button>
             <button class="action-btn btn-b" onclick="manualFill('=')">=</button>
             <button class="action-btn btn-b" onclick="manualFill('3x')">3x</button>
             <button class="action-btn btn-g" onclick="checkWp()">✅ 檢查</button>
         </div>
-        <p id="wp-msg" style="text-align:center; font-weight:bold; font-size:1.2rem; margin-top:10px;"></p>
+        <p id="wp-msg" style="text-align:center; font-weight:bold; margin-top:10px;"></p>
     </div>
 
     <div class="brand-watermark">STEM INSIGHT</div>
@@ -217,94 +174,56 @@
             event.target.classList.add('active');
         }
 
-        // --- 天平邏輯 (修復版) ---
+        // --- 天平邏輯 ---
         function initBalance() {
             const l = document.getElementById('pan-left');
             const r = document.getElementById('pan-right');
             l.innerHTML = ''; r.innerHTML = '';
-            // 左: 2x + 6
             for(let i=0; i<2; i++) l.innerHTML += `<div class="block-x">X</div>`;
             for(let i=0; i<6; i++) l.innerHTML += `<div class="block-1">1</div>`;
-            // 右: 10
             for(let i=0; i<10; i++) r.innerHTML += `<div class="block-1">1</div>`;
-            
-            document.getElementById('beam').className = 'beam-container'; // 重置旋轉
+            document.getElementById('beam').className = 'beam-container';
             document.getElementById('bal-msg').innerText = "";
             document.getElementById('eq-l').innerText = "2x + 6";
             document.getElementById('eq-r').innerText = "10";
-            
-            // 恢復所有顯示
             document.querySelectorAll('.block-1').forEach(el => el.style.opacity = '1');
-            document.querySelectorAll('.block-1').forEach(el => el.style.transform = 'scale(1)');
         }
-
         function wrongMove() {
-            // 左邊拿掉 -> 左邊變輕 -> 左邊翹起來 (順時針 ClockWise)
-            document.getElementById('beam').className = 'beam-container tilt-cw';
-            document.getElementById('bal-msg').innerText = "⚠️ 錯誤！只減左邊，天平歪掉了！(左輕右重)";
-            document.getElementById('bal-msg').style.color = "var(--danger)";
-            
-            // 視覺淡化左邊
+            document.getElementById('beam').className = 'beam-container tilt-cw'; // 順時針轉(左輕右重)
+            document.getElementById('bal-msg').innerText = "⚠️ 錯誤！只拿左邊，天平歪了！";
             document.querySelectorAll('#pan-left .block-1').forEach(el => el.style.opacity = '0.3');
         }
-
         function correctMove() {
-            document.getElementById('beam').className = 'beam-container'; // 保持水平
-            document.getElementById('bal-msg').innerText = "🎉 正確！兩邊同時減 6，保持平衡。";
-            document.getElementById('bal-msg').style.color = "var(--success)";
-            
-            // 兩邊消失
+            document.getElementById('beam').className = 'beam-container';
+            document.getElementById('bal-msg').innerText = "✅ 正確！兩邊同時拿掉。";
             const l = document.querySelectorAll('#pan-left .block-1');
             const r = document.querySelectorAll('#pan-right .block-1');
-            for(let i=0; i<6; i++) {
-                if(l[i]) l[i].classList.add('vanish');
-                if(r[i]) r[i].classList.add('vanish');
-            }
-            setTimeout(() => {
-                document.getElementById('eq-l').innerText = "2x";
-                document.getElementById('eq-r').innerText = "4";
-            }, 500);
+            for(let i=0; i<6; i++) { if(l[i]) l[i].classList.add('vanish'); if(r[i]) r[i].classList.add('vanish'); }
+            setTimeout(() => { document.getElementById('eq-l').innerText = "2x"; document.getElementById('eq-r').innerText = "4"; }, 500);
         }
+        initBalance();
 
-        initBalance(); // 啟動初始化
-
-        // --- 分數邏輯 ---
-        function showFrac(isCorrect) {
-            const box = document.getElementById('frac-step');
-            const el = document.getElementById('frac-const');
-            const msg = document.getElementById('frac-msg');
-            
-            box.style.opacity = '1';
-            
-            if(isCorrect) {
-                el.innerText = "+ 6";
-                el.className = "step-el correct";
-                msg.innerText = "⭕ 正確！常數項也要乘以 3 (公平原則)";
-                msg.style.color = "var(--success)";
-            } else {
-                el.innerText = "+ 2";
-                el.className = "step-el wrong";
-                msg.innerText = "❌ 錯誤！你忘記乘 2 了！";
-                msg.style.color = "var(--danger)";
+        // --- 複雜分數邏輯 ---
+        function fracStep(step) {
+            document.querySelectorAll('.step-row').forEach(el => el.classList.remove('active'));
+            for(let i=1; i<=step; i++) {
+                setTimeout(() => document.getElementById('fs'+i).classList.add('active'), (i-1)*200);
             }
+        }
+        function fracReset() {
+            document.querySelectorAll('.step-row').forEach(el => el.classList.remove('active'));
         }
 
         // --- 翻譯機邏輯 ---
         function fillSlot(idx, val) {
-            // 自動尋找空位
             for(let i=0; i<3; i++) {
                 let s = document.getElementById('s'+i);
-                if(!s.classList.contains('filled')) {
-                    s.innerText = val;
-                    s.classList.add('filled');
-                    return;
-                }
+                if(!s.classList.contains('filled')) { s.innerText = val; s.classList.add('filled'); return; }
             }
         }
         function manualFill(val) { fillSlot(0, val); }
         function clearSlot(idx) {
-            let s = document.getElementById('s'+idx);
-            s.innerText = ''; s.classList.remove('filled');
+            let s = document.getElementById('s'+idx); s.innerText = ''; s.classList.remove('filled');
             document.getElementById('wp-msg').innerText = "";
         }
         function checkWp() {
@@ -312,16 +231,12 @@
             const v1 = document.getElementById('s1').innerText;
             const v2 = document.getElementById('s2').innerText;
             const msg = document.getElementById('wp-msg');
-            
             if(v0 === '=' && v1 === '3x' && v2 === '-') {
-                msg.innerText = "🎉 正確！ y = 3x - 5";
-                msg.style.color = "var(--success)";
+                msg.innerText = "🎉 正確！ y = 3x - 5"; msg.style.color = "var(--success)";
             } else if(v0 === '=' && v1 === '-' && v2 === '3x') {
-                msg.innerText = "⚠️ 陷阱！「少 5」代表 5 是被減數！(應該是 3x - 5)";
-                msg.style.color = "#e67e22";
+                msg.innerText = "⚠️ 陷阱！「少 5」代表 5 在後面被減！"; msg.style.color = "#e67e22";
             } else {
-                msg.innerText = "❌ 順序不對喔，再試試看！";
-                msg.style.color = "var(--danger)";
+                msg.innerText = "❌ 順序不對喔！"; msg.style.color = "var(--danger)";
             }
         }
     </script>
