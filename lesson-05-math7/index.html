@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>七年級數學 | 方程式實戰 (Final Unblocked)</title>
+    <title>七年級數學 | 方程式實戰 (High Clearance)</title>
     <style>
         :root { --primary: #3498db; --danger: #e74c3c; --success: #2ecc71; --dark: #2c3e50; --bg: #f5f7fa; }
         body { font-family: 'Segoe UI', '微軟正黑體', sans-serif; background: var(--bg); margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
@@ -19,62 +19,56 @@
 
         h2 { margin-top: 0; color: var(--dark); border-bottom: 2px solid #eee; padding-bottom: 10px; }
 
-        /* --- 天平區 (無遮擋修正) --- */
+        /* --- 天平區 (防遮擋修正) --- */
         .balance-wrapper {
             position: relative; 
             width: 100%; 
-            height: 400px; /* 加高高度 */
+            height: 500px; /* 暴力加高到 500px，確保空間足夠 */
             background: linear-gradient(to bottom, #fdfdfd, #f1f1f1); 
             border: 1px solid #ddd; 
             border-radius: 10px; 
             margin-top: 20px; 
-            /* 移除 overflow: hidden 以免切到盤子 */
-            overflow: visible; 
+            overflow: visible; /* 允許溢出顯示 */
         }
 
-        /* 結果彈窗氣泡 (Result Bubble) */
+        /* 支點：大幅上移 (距離底部 200px) */
+        .pivot {
+            position: absolute; bottom: 200px; left: 50%; transform: translateX(-50%);
+            width: 0; height: 0; border-left: 30px solid transparent; border-right: 30px solid transparent; border-bottom: 60px solid var(--dark); z-index: 2;
+        }
+        
+        /* 橫桿：對應支點尖端 (200 + 60 = 260px) */
+        .beam-container {
+            position: absolute; width: 500px; height: 12px; background: var(--dark); border-radius: 6px;
+            bottom: 260px; left: 50%; margin-left: -250px;
+            transform-origin: 50% 50%; transition: transform 0.8s cubic-bezier(0.5, 1.5, 0.5, 1); z-index: 3;
+        }
+        .beam-container.tilt-cw { transform: rotate(15deg); }
+        
+        /* 繩子 */
+        .string { width: 4px; height: 80px; background: #95a5a6; position: absolute; top: 6px; }
+        .string.left { left: 20px; } .string.right { right: 20px; }
+        
+        /* 托盤 */
+        .pan {
+            width: 140px; height: 100px; border: 4px solid var(--dark); border-top: none;
+            background: rgba(255,255,255,0.95); position: absolute; top: 80px; left: 50%; transform: translateX(-50%);
+            display: flex; flex-wrap: wrap-reverse; justify-content: center; align-content: flex-start; padding: 8px; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        /* 結果氣泡 */
         .result-bubble {
-            position: absolute;
-            top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0);
-            background: rgba(255, 255, 255, 0.95);
-            padding: 20px 40px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            text-align: center;
-            font-size: 1.5rem;
-            font-weight: bold;
-            z-index: 999;
-            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            pointer-events: none; /* 讓點擊穿透 */
-            border: 4px solid var(--dark);
+            position: absolute; top: 20%; left: 50%; transform: translate(-50%, -50%) scale(0);
+            background: rgba(255, 255, 255, 0.95); padding: 15px 30px; border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2); text-align: center; font-size: 1.4rem; font-weight: bold;
+            z-index: 999; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); pointer-events: none;
+            border: 4px solid var(--dark); width: 60%;
         }
         .result-bubble.show { transform: translate(-50%, -50%) scale(1); }
         .result-bubble.correct { border-color: var(--success); color: var(--success); }
         .result-bubble.wrong { border-color: var(--danger); color: var(--danger); }
 
-        /* 支點：提高位置 */
-        .pivot {
-            position: absolute; bottom: 80px; left: 50%; transform: translateX(-50%);
-            width: 0; height: 0; border-left: 30px solid transparent; border-right: 30px solid transparent; border-bottom: 60px solid var(--dark); z-index: 2;
-        }
-        /* 橫桿：對應支點尖端 (80+60=140) */
-        .beam-container {
-            position: absolute; width: 500px; height: 12px; background: var(--dark); border-radius: 6px;
-            bottom: 140px; left: 50%; margin-left: -250px;
-            transform-origin: 50% 50%; transition: transform 0.8s cubic-bezier(0.5, 1.5, 0.5, 1); z-index: 3;
-        }
-        .beam-container.tilt-cw { transform: rotate(15deg); }
-        
-        .string { width: 4px; height: 100px; background: #95a5a6; position: absolute; top: 6px; }
-        .string.left { left: 20px; } .string.right { right: 20px; }
-        
-        .pan {
-            width: 140px; height: 100px; border: 4px solid var(--dark); border-top: none;
-            background: rgba(255,255,255,0.95); position: absolute; top: 100px; left: 50%; transform: translateX(-50%);
-            display: flex; flex-wrap: wrap-reverse; justify-content: center; align-content: flex-start; padding: 8px; 
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-        
         .block-x { width: 32px; height: 32px; background: var(--danger); color: white; margin: 3px; display: flex; align-items: center; justify-content: center; font-weight: bold; border-radius: 4px; box-shadow: 2px 2px 0 rgba(0,0,0,0.1); border: 1px solid #c0392b; }
         .block-1 { width: 24px; height: 24px; background: var(--primary); color: white; margin: 3px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; border: 1px solid #2980b9; transition: 0.5s; box-shadow: 1px 1px 0 rgba(0,0,0,0.1); }
         .vanish { opacity: 0; transform: scale(0); }
@@ -122,7 +116,8 @@
         </div>
         
         <div class="balance-wrapper">
-            <div id="bubble" class="result-bubble"></div> <div class="beam-container" id="beam">
+            <div id="bubble" class="result-bubble"></div>
+            <div class="beam-container" id="beam">
                 <div class="string left"><div class="pan" id="pan-left"></div></div>
                 <div class="string right"><div class="pan" id="pan-right"></div></div>
             </div>
@@ -189,12 +184,11 @@
             event.target.classList.add('active');
         }
 
-        // --- 天平邏輯 ---
         function showBubble(text, type) {
             const b = document.getElementById('bubble');
             b.innerText = text;
             b.className = "result-bubble show " + type;
-            setTimeout(() => b.classList.remove('show'), 2000); // 2秒後自動消失
+            setTimeout(() => b.classList.remove('show'), 2000);
         }
 
         function initBalance() {
@@ -227,16 +221,12 @@
         }
         initBalance();
 
-        // --- 分數邏輯 ---
         function fracStep(step) {
             document.querySelectorAll('.step-row').forEach(el => el.classList.remove('active'));
-            for(let i=1; i<=step; i++) {
-                setTimeout(() => document.getElementById('fs'+i).classList.add('active'), (i-1)*200);
-            }
+            for(let i=1; i<=step; i++) { setTimeout(() => document.getElementById('fs'+i).classList.add('active'), (i-1)*200); }
         }
         function fracReset() { document.querySelectorAll('.step-row').forEach(el => el.classList.remove('active')); }
 
-        // --- 翻譯機邏輯 ---
         function fillSlot(idx, val) {
             for(let i=0; i<3; i++) {
                 let s = document.getElementById('s'+i);
