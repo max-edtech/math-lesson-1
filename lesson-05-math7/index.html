@@ -2,111 +2,186 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>分數解碼器 & 應用題翻譯機 | STEM INSIGHT</title>
+    <title>七年級數學 | 一元一次方程式工具箱</title>
     <style>
-        body { font-family: '微軟正黑體'; background: #f0f2f5; text-align: center; }
-        .container { max-width: 800px; margin: 20px auto; background: white; padding: 20px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
-        .brand { color: #1a2a6c; font-weight: bold; margin-bottom: 20px; display: block; }
+        :root { --primary: #3498db; --accent: #f1c40f; --dark: #2c3e50; }
+        body { font-family: '微軟正黑體', sans-serif; background: #f0f2f5; margin: 0; display: flex; flex-direction: column; align-items: center; }
         
-        .mode-btn { padding: 10px 20px; background: #eee; border: none; cursor: pointer; border-radius: 5px; margin: 5px; }
-        .mode-btn.active { background: #3498db; color: white; }
+        .brand-watermark { position: fixed; bottom: 20px; right: 20px; background: rgba(26, 42, 108, 0.8); color: white; padding: 8px 15px; border-radius: 50px; font-size: 12px; pointer-events: none; }
+        
+        /* 頁籤 */
+        .tabs { display: flex; width: 100%; background: var(--dark); padding: 10px 0; justify-content: center; gap: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .tab-btn { background: transparent; color: #ccc; border: 2px solid transparent; padding: 8px 20px; cursor: pointer; font-size: 1rem; border-radius: 20px; font-weight: bold; }
+        .tab-btn.active { background: white; color: var(--dark); border-color: white; }
 
-        .section { display: none; }
-        .section.active { display: block; }
+        .container { width: 90%; max-width: 800px; background: white; margin-top: 30px; border-radius: 15px; padding: 30px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); display: none; }
+        .container.active { display: block; }
 
-        /* 分數消除區 */
-        .equation-box { font-size: 2rem; margin: 30px; letter-spacing: 2px; }
-        .frac { display: inline-block; vertical-align: middle; text-align: center; }
-        .frac span { display: block; padding: 0 5px; }
-        .frac .top { border-bottom: 2px solid black; }
-        
-        .visual-bar-container { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 20px; height: 60px; }
-        .bar { width: 100px; height: 40px; background: #3498db; color: white; display: flex; align-items: center; justify-content: center; transition: 0.5s; position: relative; }
-        .bar-frac { width: 33px; background: #e74c3c; border-right: 1px solid white; } /* 1/3 */
-        
-        /* 應用題區 */
-        .word-problem { font-size: 1.5rem; margin: 20px; line-height: 2; text-align: left; border: 2px dashed #ccc; padding: 20px; }
-        .keyword { cursor: pointer; border-bottom: 2px solid #f1c40f; padding-bottom: 2px; transition: 0.3s; }
+        h2 { border-bottom: 2px solid #eee; padding-bottom: 10px; color: var(--dark); }
+
+        /* --- 天平樣式 --- */
+        .balance-scale { position: relative; width: 100%; height: 250px; margin-top: 20px; }
+        .beam { width: 80%; height: 8px; background: var(--dark); position: absolute; bottom: 40px; left: 10%; border-radius: 4px; transition: 0.5s; display: flex; justify-content: space-between; }
+        .pivot { width: 0; height: 0; border-left: 20px solid transparent; border-right: 20px solid transparent; border-bottom: 40px solid var(--dark); position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); }
+        .pan { width: 120px; height: 100px; border: 3px solid var(--dark); border-top: none; position: relative; bottom: -20px; display: flex; flex-wrap: wrap-reverse; justify-content: center; align-content: flex-start; }
+        .block-x { width: 30px; height: 30px; background: #e74c3c; color: white; margin: 2px; display: flex; align-items: center; justify-content: center; font-weight: bold; border-radius: 4px; }
+        .block-1 { width: 20px; height: 20px; background: var(--primary); color: white; margin: 2px; border-radius: 50%; font-size: 12px; display: flex; align-items: center; justify-content: center; }
+        .vanish { transform: scale(0); opacity: 0; transition: 0.5s; }
+
+        /* --- 分數樣式 --- */
+        .frac-eqn { font-size: 2rem; text-align: center; margin: 30px 0; }
+        .frac { display: inline-block; vertical-align: middle; text-align: center; margin: 0 5px; }
+        .frac .top { border-bottom: 2px solid black; display: block; padding: 0 5px; }
+        .bar-container { display: flex; height: 50px; width: 300px; border: 2px solid #333; margin: 0 auto; background: #eee; }
+        .bar-part { flex: 1; border-right: 1px dashed white; display: flex; align-items: center; justify-content: center; color: #aaa; transition: 0.5s; }
+        .bar-part.filled { background: #e74c3c; color: white; }
+
+        /* --- 應用題樣式 --- */
+        .word-problem { font-size: 1.4rem; line-height: 1.8; text-align: left; background: #fafafa; padding: 20px; border-radius: 10px; border-left: 5px solid var(--accent); }
+        .keyword { border-bottom: 2px solid var(--accent); cursor: pointer; transition: 0.3s; padding: 0 5px; }
         .keyword:hover { background: #fff3cd; }
-        .keyword.revealed { background: #27ae60; color: white; padding: 2px 5px; border-radius: 4px; }
+        .keyword.revealed { background: #27ae60; color: white; border: none; border-radius: 4px; }
+        .math-out { font-size: 2rem; font-weight: bold; color: var(--dark); text-align: center; margin-top: 20px; height: 40px; }
+
+        button.action-btn { background: var(--dark); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin-top: 20px; font-size: 1rem; }
+        button.action-btn:hover { background: #34495e; }
     </style>
 </head>
 <body>
-    <span class="brand">STEM INSIGHT | 數學進階工具</span>
-    
-    <div>
-        <button class="mode-btn active" onclick="setMode('frac')">🛡️ 分數消除術</button>
-        <button class="mode-btn" onclick="setMode('word')">🗣️ 應用題翻譯機</button>
+
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('balance')">⚖️ 天平 (移項法則)</button>
+        <button class="tab-btn" onclick="switchTab('fraction')">🛡️ 分數消除術</button>
+        <button class="tab-btn" onclick="switchTab('word')">🗣️ 應用題翻譯機</button>
     </div>
 
-    <div id="frac" class="section active">
-        <h3>遇到分數未知數怎麼辦？</h3>
-        <p>題目： <span class="frac"><span class="top">x</span><span>3</span></span> + 2 = 5</p>
-        
-        <div class="visual-bar-container">
-            <div class="bar" style="width:100px; background:#ddd;" id="bar-x">
-                <div class="bar-frac" style="width:33.3%; background:#e74c3c;">x/3</div>
-                <div class="bar-frac" style="width:33.3%; background:#eee;"></div>
-                <div class="bar-frac" style="width:33.3%; background:#eee;"></div>
+    <div id="balance" class="container active">
+        <h2>等量公理：兩邊同時做一樣的事</h2>
+        <div style="text-align:center; font-size:1.5rem; margin-bottom:10px;">
+            <span id="eq-l">2x + 6</span> = <span id="eq-r">10</span>
+        </div>
+        <div class="balance-scale">
+            <div class="beam">
+                <div class="pan" id="pan-left">
+                    </div>
+                <div class="pan" id="pan-right"></div>
             </div>
-            <span>+ 2 = 5</span>
+            <div class="pivot"></div>
         </div>
-
-        <button onclick="multiplyEquation()" style="margin-top:20px; padding:10px 20px; background:#e74c3c; color:white; border:none; border-radius:5px; cursor:pointer;">⚡ 發動魔法：同乘 3</button>
-
-        <div id="result-area" style="margin-top:20px; font-size:1.5rem; opacity:0; transition:1s;">
-            x + 6 = 15 <br>
-            <span style="font-size:1rem; color:#666;">(分母消失了！現在你會解了吧？)</span>
+        <div style="text-align:center;">
+            <button class="action-btn" onclick="balanceStep1()">步驟一：同時拿掉 6 (減法公理)</button>
+            <button class="action-btn" onclick="balanceStep2()">步驟二：同時平分 (除法公理)</button>
+            <button class="action-btn" style="background:#e67e22" onclick="initBalance()">重置</button>
         </div>
     </div>
 
-    <div id="word" class="section">
-        <h3>點擊關鍵字，翻譯成數學符號</h3>
+    <div id="fraction" class="container">
+        <h2>遇到分母怎麼辦？</h2>
+        <div class="frac-eqn">
+            <span class="frac"><span class="top">x</span><span>3</span></span> + 2 = 5
+        </div>
+        
+        <p style="text-align:center;">想像 x 被切成 3 份，我們只拿了其中 1 份...</p>
+        <div class="bar-container">
+            <div class="bar-part filled">x/3</div>
+            <div class="bar-part">?</div>
+            <div class="bar-part">?</div>
+        </div>
+
+        <div style="text-align:center;">
+            <button class="action-btn" style="background:#e74c3c;" onclick="solveFraction()">⚡ 發動魔法：同乘 3</button>
+        </div>
+        
+        <div id="frac-result" style="text-align:center; margin-top:20px; font-size:1.5rem; opacity:0; transition:1s;">
+            x + 6 = 15 <br>
+            <span style="font-size:1rem; color:#666;">(每一項都乘以 3，分母就消失了！)</span>
+        </div>
+    </div>
+
+    <div id="word" class="container">
+        <h2>關鍵字翻譯練習</h2>
+        <p>點擊黃色底線的字，看看它變成什麼數學符號。</p>
         <div class="word-problem">
             爸爸的年齡 <span class="keyword" onclick="reveal(this, '=')">是</span> 
-            兒子的 <span class="keyword" onclick="reveal(this, '×3')">三倍</span> 
+            兒子的 <span class="keyword" onclick="reveal(this, '3x')">三倍</span> 
             <span class="keyword" onclick="reveal(this, '+')">多</span> 5 歲。
-            <br><br>
-            <span style="font-size:1rem; color:#666;">設兒子為 x，爸爸為 y</span>
+            <br>
+            (設兒子為 x，爸爸為 y)
         </div>
-        <div id="math-result" style="font-size:2rem; font-weight:bold; color:#1a2a6c; margin-top:20px;">
-            y ___ x ___ ___
-        </div>
+        <div class="math-out" id="math-output">y ___ ___ ___ 5</div>
     </div>
 
+    <div class="brand-watermark">STEM INSIGHT</div>
+
     <script>
-        function setMode(id) {
-            document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
+        function switchTab(id) {
+            document.querySelectorAll('.container').forEach(el => el.classList.remove('active'));
             document.getElementById(id).classList.add('active');
-            document.querySelectorAll('.mode-btn').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
             event.target.classList.add('active');
         }
 
-        function multiplyEquation() {
-            // 動畫：長條圖填滿
-            const parts = document.querySelectorAll('.bar-frac');
-            parts.forEach(p => {
-                p.style.background = '#e74c3c';
-                p.innerText = '';
-            });
-            document.getElementById('bar-x').innerHTML = 'x (完整)';
-            document.getElementById('bar-x').style.background = '#e74c3c';
+        // --- 天平邏輯 ---
+        function initBalance() {
+            const l = document.getElementById('pan-left');
+            const r = document.getElementById('pan-right');
+            l.innerHTML = ''; r.innerHTML = '';
+            // Left: 2x + 6
+            for(let i=0;i<2;i++) l.innerHTML += '<div class="block-x">X</div>';
+            for(let i=0;i<6;i++) l.innerHTML += '<div class="block-1">1</div>';
+            // Right: 10
+            for(let i=0;i<10;i++) r.innerHTML += '<div class="block-1">1</div>';
             
-            // 顯示結果
-            document.getElementById('result-area').style.opacity = '1';
+            document.getElementById('eq-l').innerText = "2x + 6";
+            document.getElementById('eq-r').innerText = "10";
         }
 
-        function reveal(el, symbol) {
-            el.innerText = symbol;
+        function balanceStep1() {
+            // 移除兩邊各 6 個 1
+            const l_ones = document.querySelectorAll('#pan-left .block-1');
+            const r_ones = document.querySelectorAll('#pan-right .block-1');
+            for(let i=0; i<6; i++) {
+                if(l_ones[i]) l_ones[i].classList.add('vanish');
+                if(r_ones[i]) r_ones[i].classList.add('vanish');
+            }
+            setTimeout(() => {
+                document.getElementById('eq-l').innerText = "2x";
+                document.getElementById('eq-r').innerText = "4";
+            }, 500);
+        }
+
+        function balanceStep2() {
+            alert("剩下 2 個 X 和 4 個 1。平均分給 X，每個 X 得到 2！");
+            document.getElementById('eq-l').innerText = "x";
+            document.getElementById('eq-r').innerText = "2";
+        }
+        
+        initBalance(); // 啟動初始化
+
+        // --- 分數邏輯 ---
+        function solveFraction() {
+            document.querySelectorAll('.bar-part').forEach(el => {
+                el.classList.add('filled');
+                el.innerText = 'x/3';
+            });
+            setTimeout(() => {
+                document.querySelector('.bar-container').style.background = "#e74c3c";
+                document.querySelector('.bar-container').innerHTML = "<div style='width:100%; text-align:center; color:white; font-weight:bold; line-height:50px;'>x (完整)</div>";
+                document.getElementById('frac-result').style.opacity = '1';
+            }, 1000);
+        }
+
+        // --- 應用題邏輯 ---
+        function reveal(el, txt) {
+            el.innerText = txt;
             el.classList.add('revealed');
-            updateMathResult();
+            updateMath();
         }
-
-        function updateMathResult() {
-            // 簡單檢查這題
-            const text = document.querySelector('.word-problem').innerText;
-            if(text.includes('=') && text.includes('×3') && text.includes('+')) {
-                document.getElementById('math-result').innerText = "y = 3x + 5";
+        function updateMath() {
+            const txt = document.querySelector('.word-problem').innerText;
+            if(txt.includes('=') && txt.includes('3x') && txt.includes('+')) {
+                document.getElementById('math-output').innerText = "y = 3x + 5";
+                document.getElementById('math-output').style.color = "#27ae60";
             }
         }
     </script>

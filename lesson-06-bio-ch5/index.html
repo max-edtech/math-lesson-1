@@ -2,48 +2,130 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>Ch5 生物戰情中心 v2.0 | STEM INSIGHT</title>
+    <title>Ch5 生物戰情中心 (完整版) | STEM INSIGHT</title>
     <style>
         :root { --primary: #2c3e50; --accent: #27ae60; --nerve: #f1c40f; --hormone: #e74c3c; }
         body { font-family: '微軟正黑體', sans-serif; background: #f4f7f6; margin: 0; display: flex; flex-direction: column; height: 100vh; }
-        .nav-bar { background: var(--primary); padding: 15px; display: flex; justify-content: center; gap: 10px; }
+        
+        /* 導航列 */
+        .nav-bar { background: var(--primary); padding: 15px; display: flex; justify-content: center; gap: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         .nav-btn { padding: 8px 15px; cursor: pointer; border: none; background: rgba(255,255,255,0.1); color: white; border-radius: 50px; font-weight: bold; transition: 0.3s; }
-        .nav-btn.active { background: var(--accent); transform: scale(1.1); }
-        .content { flex: 1; position: relative; overflow: hidden; }
-        .scene { display: none; height: 100%; padding: 20px; flex-direction: column; align-items: center; justify-content: center; }
-        .scene.active { display: flex; }
-        
-        .brand-watermark { position: fixed; bottom: 20px; right: 20px; background: rgba(26, 42, 108, 0.8); color: white; padding: 8px 15px; border-radius: 50px; pointer-events: none; }
-        .desc-box { background: white; padding: 20px; border-radius: 10px; margin-top: 20px; max-width: 600px; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
-        .btn-group button { margin: 5px; padding: 8px 16px; cursor: pointer; background: white; border: 2px solid #ccc; border-radius: 5px; }
-        .btn-group button:hover { background: #eee; }
+        .nav-btn.active { background: var(--accent); transform: scale(1.1); box-shadow: 0 0 10px var(--accent); }
+        .nav-btn:hover { background: rgba(255,255,255,0.3); }
 
-        /* 植物區樣式 */
-        .plant-container { position: relative; width: 300px; height: 300px; border-bottom: 5px solid #5d4037; display: flex; justify-content: center; align-items: flex-end; }
-        .pot { width: 60px; height: 50px; background: #d35400; position: relative; transition: 1s; z-index: 2; }
-        .stem { width: 10px; height: 150px; background: #27ae60; position: absolute; bottom: 50px; left: 25px; transform-origin: bottom center; transition: 2s; border-radius: 5px; }
-        .root { width: 8px; height: 80px; background: #efebe9; position: absolute; top: 50px; left: 26px; transform-origin: top center; transition: 2s; opacity: 0; } /* 根平常看不到 */
+        .content { flex: 1; position: relative; overflow-y: auto; padding-bottom: 50px; }
+        .scene { display: none; padding: 20px; flex-direction: column; align-items: center; animation: fadeIn 0.5s; }
+        .scene.active { display: flex; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* 通用卡片 */
+        .desc-box { background: white; padding: 20px; border-radius: 10px; margin-top: 20px; max-width: 600px; width: 90%; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .btn-group button { margin: 5px; padding: 8px 16px; cursor: pointer; background: white; border: 2px solid #ccc; border-radius: 5px; transition: 0.2s; }
+        .btn-group button:hover { background: #eee; transform: translateY(-2px); }
+
+        /* --- Scene 1: 神經系統 --- */
+        .pathway-container { display: flex; align-items: center; gap: 5px; margin-top: 20px; flex-wrap: wrap; justify-content: center; }
+        .node { width: 60px; height: 60px; background: white; border: 3px solid var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 13px; transition: 0.2s; }
+        .arrow { font-size: 1.5rem; color: #ccc; }
+        .activate { border-color: var(--nerve); background: #fffbe6; transform: scale(1.1); box-shadow: 0 0 10px var(--nerve); }
+
+        /* --- Scene 2: 內分泌 (整合版) --- */
+        .sub-tab-container { margin-bottom: 20px; }
+        .sub-tab { padding: 5px 15px; cursor: pointer; border: 1px solid var(--hormone); background: white; color: var(--hormone); }
+        .sub-tab.active { background: var(--hormone); color: white; }
         
-        .mimosa-leaf { width: 100px; height: 40px; background: #27ae60; border-radius: 50px 0; position: absolute; top: -20px; left: -45px; cursor: pointer; transition: 0.2s; }
+        .hormone-section { display: none; width: 100%; flex-direction: column; align-items: center; }
+        .hormone-section.active { display: flex; }
+
+        /* 血糖球 */
+        .chart-container { width: 280px; height: 200px; background: white; border-radius: 15px; position: relative; border-left: 2px solid #333; border-bottom: 2px solid #333; margin: 20px auto; }
+        .sugar-level { position: absolute; left: 0; bottom: 50%; width: 100%; height: 2px; border-top: 2px dashed #ccc; } 
+        .current-level { position: absolute; left: 45%; width: 25px; height: 25px; background: var(--hormone); border-radius: 50%; bottom: 50%; transition: bottom 1s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+
+        /* 病患模擬 */
+        .person { font-size: 5rem; transition: 0.5s; margin: 20px; }
+        .shake { animation: shake 0.5s infinite; }
+        @keyframes shake { 0% { transform: rotate(0deg); } 25% { transform: rotate(5deg); } 75% { transform: rotate(-5deg); } 100% { transform: rotate(0deg); } }
+
+        /* --- Scene 3: 植物 --- */
+        .plant-container { position: relative; width: 200px; height: 250px; border-bottom: 5px solid #5d4037; display: flex; justify-content: center; align-items: flex-end; margin-top: 30px; }
+        .pot { width: 60px; height: 50px; background: #d35400; position: relative; transition: 1s; z-index: 2; }
+        .stem { width: 10px; height: 120px; background: #27ae60; position: absolute; bottom: 50px; left: 25px; transform-origin: bottom center; transition: 2s; border-radius: 5px; }
+        .root { width: 8px; height: 80px; background: #efebe9; position: absolute; top: 50px; left: 26px; transform-origin: top center; transition: 2s; opacity: 0; }
+        .mimosa-leaf { width: 80px; height: 30px; background: #27ae60; border-radius: 50px 0; position: absolute; top: -10px; left: -35px; cursor: pointer; transition: 0.2s; }
         .mimosa-leaf.closed { transform: scaleX(0.1); background: #555; }
 
-        /* 內分泌樣式 */
-        .person { font-size: 5rem; transition: 0.5s; }
-        .thyroid-eyes { font-size: 1rem; position: absolute; top: 30%; display: none; }
+        .brand-watermark { position: fixed; bottom: 20px; right: 20px; background: rgba(26, 42, 108, 0.8); color: white; padding: 8px 15px; border-radius: 50px; font-size: 12px; pointer-events: none; z-index: 100; }
     </style>
 </head>
 <body>
 
     <div class="nav-bar">
-        <button class="nav-btn active" onclick="switchScene(0)">🌿 植物感應 (比較)</button>
-        <button class="nav-btn" onclick="switchScene(1)">💉 激素失調診所</button>
-        <button class="nav-btn" onclick="switchScene(2)">⚡ 神經 vs 內分泌</button>
+        <button class="nav-btn active" onclick="switchScene(0)">⚡ 5-2 神經傳導</button>
+        <button class="nav-btn" onclick="switchScene(1)">💉 5-3 內分泌系統</button>
+        <button class="nav-btn" onclick="switchScene(2)">🌿 5-4 植物感應</button>
     </div>
 
     <div class="content">
         <div class="scene active" id="scene-0">
-            <h2>🌿 向性 vs 傾性 (觸發)</h2>
-            <div class="plant-container" id="plant-stage">
+            <h3>🧠 刺激與反應的路徑</h3>
+            <div class="desc-box">
+                <div class="pathway-container">
+                    <div class="node" id="n1">受器</div> <div class="arrow">➜</div>
+                    <div class="node" id="n2">感覺<br>神經</div> <div class="arrow">➜</div>
+                    <div class="node" id="n3" style="border-color: #e74c3c">中樞<br>(腦/脊髓)</div> <div class="arrow">➜</div>
+                    <div class="node" id="n4">運動<br>神經</div> <div class="arrow">➜</div>
+                    <div class="node" id="n5">動器</div>
+                </div>
+                <div style="margin-top:20px;">
+                    <button class="nav-btn" style="background:#e67e22;" onclick="runPathway('reflex')">🔥 摸到熱鍋 (反射)</button>
+                    <button class="nav-btn" style="background:#3498db;" onclick="runPathway('conscious')">🦟 看到蚊子 (意識)</button>
+                </div>
+                <p id="neuro-log" style="color:#555; height: 20px;">請選擇刺激...</p>
+            </div>
+        </div>
+
+        <div class="scene" id="scene-1">
+            <div class="sub-tab-container">
+                <button class="sub-tab active" onclick="switchHormoneTab('sugar')">A. 血糖恆定 (回饋)</button>
+                <button class="sub-tab" onclick="switchHormoneTab('clinic')">B. 激素失調診所</button>
+            </div>
+
+            <div id="sugar-mode" class="hormone-section active">
+                <div class="chart-container">
+                    <div style="position: absolute; top: 10px; left: 10px; color: #aaa; font-size:12px;">高血糖</div>
+                    <div style="position: absolute; bottom: 10px; left: 10px; color: #aaa; font-size:12px;">低血糖</div>
+                    <div class="sugar-level"></div>
+                    <div class="current-level" id="glucose-ball"></div>
+                </div>
+                <div class="desc-box">
+                    <p>狀態：<span id="sugar-status" style="font-weight:bold;">恆定</span></p>
+                    <button class="nav-btn" style="background:#e74c3c;" onclick="changeSugar(85)">🍱 吃飽飯 (胰島素)</button>
+                    <button class="nav-btn" style="background:#2980b9;" onclick="changeSugar(15)">🏃 運動後 (升糖素)</button>
+                </div>
+            </div>
+
+            <div id="clinic-mode" class="hormone-section">
+                <div class="person" id="patient">😐</div>
+                <div class="desc-box">
+                    <label>部位：</label>
+                    <select id="hormone-select" style="padding:5px;">
+                        <option value="growth">腦垂腺 (生長激素)</option>
+                        <option value="thyroid">甲狀腺 (甲狀腺素)</option>
+                    </select>
+                    <div class="btn-group" style="margin-top:10px;">
+                        <button onclick="inject('low')">⬇️ 不足</button>
+                        <button onclick="resetPatient()">🟢 正常</button>
+                        <button onclick="inject('high')">⬆️ 過量</button>
+                    </div>
+                    <p id="clinic-log" style="color:#b21f1f; font-weight:bold; min-height: 20px;"></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="scene" id="scene-2">
+            <h3>🌿 植物感應大亂鬥</h3>
+            <div class="plant-container">
                 <div class="pot" id="pot">
                     <div class="stem" id="stem"><div class="mimosa-leaf" id="leaf" onclick="touchMimosa()"></div></div>
                     <div class="root" id="root"></div>
@@ -52,39 +134,10 @@
             <div class="desc-box">
                 <div class="btn-group">
                     <button onclick="resetPlant()">🔄 復原</button>
-                    <button onclick="doGeotropism()">🌎 倒放實驗 (向地性)</button>
-                    <button onclick="touchMimosa()">🖐️ 觸摸含羞草 (膨壓)</button>
+                    <button onclick="doGeotropism()">🌎 倒放 (向地/背地)</button>
+                    <button onclick="touchMimosa()">🖐️ 觸摸含羞草</button>
                 </div>
-                <p id="plant-log">請選擇實驗...</p>
-            </div>
-        </div>
-
-        <div class="scene" id="scene-1">
-            <h2>💉 激素分泌異常模擬</h2>
-            <div style="height: 200px; display: flex; align-items: center; justify-content: center; position: relative;">
-                <div class="person" id="patient">😐</div>
-            </div>
-            <div class="desc-box">
-                <label>選擇激素：</label>
-                <select id="hormone-select" onchange="resetPatient()">
-                    <option value="growth">生長激素 (腦垂腺)</option>
-                    <option value="thyroid">甲狀腺素 (甲狀腺)</option>
-                </select>
-                <div class="btn-group" style="margin-top:10px;">
-                    <button onclick="inject('low')">⬇️ 分泌不足</button>
-                    <button onclick="resetPatient()">🟢 正常</button>
-                    <button onclick="inject('high')">⬆️ 分泌過量</button>
-                </div>
-                <p id="clinic-log" style="color:#e74c3c; font-weight:bold;">請選擇狀態</p>
-            </div>
-        </div>
-        
-        <div class="scene" id="scene-2">
-            <h2>⚡ 系統比較</h2>
-            <p>（此處可保留原本神經傳導的代碼，或做成比較表）</p>
-            <div style="text-align: left; padding: 20px; background: white; border-radius: 10px;">
-                <li><strong>神經：</strong>像電話線，速度快，範圍準，持續短。</li>
-                <li><strong>內分泌：</strong>像寄信(血液)，速度慢，範圍廣，持續長。</li>
+                <p id="plant-log" style="font-size: 14px; text-align: left; margin-top: 10px; color:#333;">說明會顯示在這裡...</p>
             </div>
         </div>
     </div>
@@ -92,9 +145,92 @@
     <div class="brand-watermark">STEM INSIGHT</div>
 
     <script>
+        // 切換主頁籤
         function switchScene(n) {
             document.querySelectorAll('.scene').forEach((el, i) => el.classList.toggle('active', i === n));
             document.querySelectorAll('.nav-btn').forEach((el, i) => el.classList.toggle('active', i === n));
+        }
+        
+        // 切換內分泌子頁籤
+        function switchHormoneTab(mode) {
+            document.getElementById('sugar-mode').classList.toggle('active', mode === 'sugar');
+            document.getElementById('clinic-mode').classList.toggle('active', mode === 'clinic');
+            document.querySelectorAll('.sub-tab').forEach(el => {
+                el.classList.toggle('active', el.innerText.includes(mode === 'sugar' ? 'A.' : 'B.'));
+            });
+        }
+
+        // --- 神經邏輯 ---
+        async function runPathway(type) {
+            const nodes = ['n1', 'n2', 'n3', 'n4', 'n5'];
+            const speed = type === 'reflex' ? 100 : 400; // 反射快，意識慢
+            document.getElementById('neuro-log').innerText = type === 'reflex' ? "脊髓反射：速度快，不經大腦！" : "大腦意識：要思考，速度慢。";
+            
+            nodes.forEach(id => document.getElementById(id).classList.remove('activate'));
+            
+            // 如果是反射，跳過大腦 (但在這裡我們簡化路徑顯示，主要用速度區分)
+            // 嚴格來說反射不一定經過n3的大腦部分，但都過中樞
+            for (let i = 0; i < nodes.length; i++) {
+                let node = document.getElementById(nodes[i]);
+                node.classList.add('activate');
+                await new Promise(r => setTimeout(r, speed));
+                node.classList.remove('activate');
+            }
+            document.getElementById('n5').classList.add('activate');
+        }
+
+        // --- 血糖邏輯 ---
+        let sugarY = 50;
+        function changeSugar(target) {
+            sugarY = target;
+            const ball = document.getElementById('glucose-ball');
+            const status = document.getElementById('sugar-status');
+            ball.style.bottom = sugarY + "%";
+            
+            if(target > 80) {
+                status.innerText = "血糖過高 → 胰島素分泌 (合成肝糖)";
+                status.style.color = "#e74c3c";
+                setTimeout(() => { sugarY = 50; ball.style.bottom = "50%"; status.innerText = "恢復恆定"; status.style.color="green"; }, 2000);
+            } else if (target < 20) {
+                status.innerText = "血糖過低 → 升糖素分泌 (分解肝糖)";
+                status.style.color = "#2980b9";
+                setTimeout(() => { sugarY = 50; ball.style.bottom = "50%"; status.innerText = "恢復恆定"; status.style.color="green"; }, 2000);
+            }
+        }
+
+        // --- 診所邏輯 ---
+        function resetPatient() {
+            const p = document.getElementById('patient');
+            p.style.transform = 'scale(1)';
+            p.innerText = "😐";
+            p.classList.remove('shake');
+            document.getElementById('clinic-log').innerText = "";
+        }
+        function inject(level) {
+            const hormone = document.getElementById('hormone-select').value;
+            const p = document.getElementById('patient');
+            const log = document.getElementById('clinic-log');
+            resetPatient(); // 先歸零
+            
+            setTimeout(() => {
+                if (hormone === 'growth') {
+                    if (level === 'high') {
+                        p.style.transform = 'scale(1.5)'; p.innerText = "😲";
+                        log.innerText = "生長激素過多：巨人症 (幼年)";
+                    } else {
+                        p.style.transform = 'scale(0.6)'; p.innerText = "👶";
+                        log.innerText = "生長激素不足：侏儒症 (智力正常)";
+                    }
+                } else { // Thyroid
+                    if (level === 'high') {
+                        p.innerText = "👀"; p.classList.add('shake');
+                        log.innerText = "甲狀腺亢進：眼突、心悸、消瘦";
+                    } else {
+                        p.innerText = "😴"; p.style.transform = 'scale(1.1)';
+                        log.innerText = "甲狀腺不足：呆小症 (幼年/智力受損)";
+                    }
+                }
+            }, 50);
         }
 
         // --- 植物邏輯 ---
@@ -106,61 +242,19 @@
             document.getElementById('leaf').classList.remove('closed');
             document.getElementById('plant-log').innerText = "植物復原。";
         }
-
         function doGeotropism() {
             resetPlant();
-            // 倒放
             document.getElementById('pot').style.transform = 'rotate(90deg) translateY(-50px)';
             document.getElementById('root').style.opacity = '1';
-            
             setTimeout(() => {
-                // 莖背地 (向上彎 -90度抵銷)
                 document.getElementById('stem').style.transform = 'rotate(-90deg)';
-                // 根向地 (向下彎 +90度)
                 document.getElementById('root').style.transform = 'rotate(90deg)';
-                document.getElementById('plant-log').innerHTML = "莖：<b style='color:green'>背地性</b> (生長素多長得快) <br> 根：<b style='color:brown'>向地性</b>";
+                document.getElementById('plant-log').innerHTML = "莖：<b style='color:green'>背地性</b> (生長素多長得快) <br> 根：<b style='color:brown'>向地性</b> (生長素多長得慢)";
             }, 1000);
         }
-
         function touchMimosa() {
             document.getElementById('leaf').classList.add('closed');
-            document.getElementById('plant-log').innerHTML = "這是<b style='color:red'>觸發運動</b>！<br>水分流失(膨壓改變)，速度快，與生長素無關。";
-        }
-
-        // --- 內分泌邏輯 ---
-        function resetPatient() {
-            const p = document.getElementById('patient');
-            p.style.transform = 'scale(1)';
-            p.innerText = "😐";
-            document.getElementById('clinic-log').innerText = "正常狀態";
-        }
-
-        function inject(level) {
-            const hormone = document.getElementById('hormone-select').value;
-            const p = document.getElementById('patient');
-            const log = document.getElementById('clinic-log');
-
-            if (hormone === 'growth') {
-                if (level === 'high') {
-                    p.style.transform = 'scale(1.5)';
-                    p.innerText = "😲";
-                    log.innerText = "幼年過量：巨人症 (Gigantism)";
-                } else {
-                    p.style.transform = 'scale(0.6)';
-                    p.innerText = "👶";
-                    log.innerText = "幼年不足：侏儒症 (Dwarfism) - 智力正常";
-                }
-            } else { // Thyroid
-                if (level === 'high') {
-                    p.innerText = "👀"; // 凸眼
-                    p.classList.add('shake'); // 模擬手抖/心悸
-                    log.innerText = "甲狀腺亢進：消瘦、緊張、眼球突出、代謝快";
-                } else {
-                    p.innerText = "😴";
-                    p.style.transform = 'scale(1.1)'; // 水腫感
-                    log.innerText = "幼年不足：呆小症 (Cretinism) - 智力受損";
-                }
-            }
+            document.getElementById('plant-log').innerHTML = "<b style='color:red'>觸發運動</b>：水分流失 (膨壓)，速度快，與生長素無關！";
         }
     </script>
 </body>
