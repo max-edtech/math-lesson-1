@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>自動化數學教材 - 分配律與湊整數</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --accent: #e74c3c;
+            --success: #27ae60;
+            --bg: #f4f7f6;
+        }
+        body {
+            font-family: "Microsoft JhengHei", sans-serif;
+            background-color: var(--bg);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .slide-container {
+            width: 800px;
+            height: 500px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            position: relative;
+            padding: 40px;
+        }
+        .slide {
+            display: none;
+            animation: fadeIn 0.8s ease-out forwards;
+        }
+        .active { display: block; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 { color: var(--primary); border-bottom: 4px solid var(--accent); display: inline-block; }
+        .equation { font-size: 3rem; font-weight: bold; text-align: center; margin: 50px 0; color: #34495e; }
+        .highlight { color: var(--accent); }
+        .hidden-one { color: rgba(231, 76, 60, 0); transition: color 1s; font-weight: bold; }
+        .reveal-one { color: rgba(231, 76, 60, 1); }
+
+        .icon-box { display: flex; justify-content: space-around; font-size: 4rem; margin-top: 20px; }
+        .note { background: #fff3cd; padding: 15px; border-radius: 10px; font-size: 1.2rem; margin-top: 20px; border-left: 5px solid #ffc107; }
+
+        .btn-nav { position: absolute; bottom: 20px; right: 20px; }
+        button { padding: 10px 20px; cursor: pointer; background: var(--primary); color: white; border: none; border-radius: 5px; }
+    </style>
+</head>
+<body>
+
+<div class="slide-container">
+    <div class="slide active" id="s1">
+        <h1>🚀 高手秒殺題</h1>
+        <div class="equation">125 × 3.14 × 8 = <span id="ans1">?</span></div>
+        <p class="note">還在從左往右算嗎？先找「好朋友」只要 3 秒鐘！</p>
+    </div>
+
+    <div class="slide" id="s2">
+        <h1>🍔 麥當勞分配律</h1>
+        <div class="equation">(🍔 + 🍟) × 8</div>
+        <div class="icon-box">➡️ 🍔×8 + 🍟×8</div>
+        <div class="note">公式：a × (b + c) = a×b + a×c<br>括號外的每個人都要發到獎金！</div>
+    </div>
+
+    <div class="slide" id="s3">
+        <h1>🤝 數字好朋友排行榜</h1>
+        <div class="equation" style="font-size: 2.5rem;">
+            <span class="highlight">25 × 4 = 100</span><br>
+            <span class="highlight">125 × 8 = 1000</span><br>
+            <span style="color:var(--success)">5 × 偶數 = 10的倍數</span>
+        </div>
+        <p class="note">看到這些組合，先讓他們「合體」！</p>
+    </div>
+
+    <div class="slide" id="s4">
+        <h1>🕵️‍♂️ 隱形的「1」</h1>
+        <div class="equation">99 × 99 + 99 <span class="hidden-one" id="one">× 1</span></div>
+        <div class="note">提取公因數：99 × (99 + 1) = <span class="highlight">9900</span></div>
+        <button onclick="revealOne()" style="margin-top:10px">戴上特務眼鏡</button>
+    </div>
+
+    <div class="btn-nav">
+        <button onclick="prevSlide()">上一步</button>
+        <button onclick="nextSlide()">下一步</button>
+    </div>
+</div>
+
+<script>
+    let currentSlide = 1;
+    const totalSlides = 4;
+
+    function showSlide(n) {
+        document.querySelectorAll('.slide').forEach(s => s.classList.remove('active'));
+        document.getElementById('s' + n).classList.add('active');
+    }
+
+    function nextSlide() {
+        if (currentSlide < totalSlides) {
+            currentSlide++;
+            showSlide(currentSlide);
+        }
+    }
+
+    function prevSlide() {
+        if (currentSlide > 1) {
+            currentSlide--;
+            showSlide(currentSlide);
+        }
+    }
+
+    function revealOne() {
+        document.getElementById('one').classList.add('reveal-one');
+    }
+</script>
+
+</body>
+</html>
