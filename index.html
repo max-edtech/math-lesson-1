@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>自動化數學教材 - 分配律與湊整數</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --accent: #e74c3c;
+            --success: #27ae60;
+            --bg: #f4f7f6;
+        }
+        body {
+            font-family: "Microsoft JhengHei", sans-serif;
+            background-color: var(--bg);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .slide-container {
+            width: 800px;
+            height: 500px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            position: relative;
+            padding: 40px;
+            box-sizing: border-box; /* 確保內距不撐大容器 */
+        }
+        .slide {
+            display: none;
+            height: 100%; /* 讓內容區塊填滿 */
+            flex-direction: column;
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+        .slide.active { display: flex; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 { color: var(--primary); border-bottom: 4px solid var(--accent); display: inline-block; margin-top: 0; }
+        .content-area { 
+            flex-grow: 1; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center; 
+            font-size: 2.5rem; 
+            font-weight: bold; 
+            color: #34495e;
+            text-align: center;
+        }
+        
+        .highlight { color: var(--accent); }
+        .success { color: var(--success); }
+        .note { 
+            background: #fff3cd; 
+            padding: 15px; 
+            border-radius: 10px; 
+            font-size: 1.2rem; 
+            margin-top: auto; /* 推到底部 */
+            border-left: 5px solid #ffc107; 
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        /* 特效類 CSS */
+        .hidden-one { color: rgba(231, 76, 60, 0); transition: color 1s; }
+        .reveal-one { color: rgba(231, 76, 60, 1); }
+        .icon-box { margin-top: 20px; font-size: 3rem; }
+
+        .btn-nav { position: absolute; bottom: 40px; right: 40px; display: flex; gap: 10px; }
+        button { 
+            padding: 10px 20px; cursor: pointer; 
+            background: var(--primary); color: white; 
+            border: none; border-radius: 5px; font-size: 1rem;
+            transition: background 0.2s;
+        }
+        button:hover { background: #34495e; }
+        button.action-btn { background: var(--accent); }
+        button.action-btn:hover { background: #c0392b; }
+    </style>
+</head>
+<body>
+
+<div class="slide-container" id="app">
+    </div>
+
+<script>
+    // ==========================================
+    // 🎯 老師修改區：請在這裡編輯課程內容
+    // ==========================================
+    const lessonData = [
+        {
+            title: "🚀 高手秒殺題",
+            // 支援 HTML 語法，例如 <span>
+            content: `125 × 3.14 × 8 = <span class="highlight">?</span>`,
+            note: "還在從左往右算嗎？先找「好朋友」只要 3 秒鐘！"
+        },
+        {
+            title: "🍔 麥當勞分配律",
+            content: `(🍔 + 🍟) × 8 <div class="icon-box">⬇️<br>🍔×8 + 🍟×8</div>`,
+            note: "公式：a × (b + c) = a×b + a×c，括號外的每個人都要發到獎金！"
+        },
+        {
+            title: "🤝 數字好朋友排行榜",
+            content: `
+                <div style="text-align:left; line-height: 1.5;">
+                    <span class="highlight">25 × 4 = 100</span><br>
+                    <span class="highlight">125 × 8 = 1000</span><br>
+                    <span class="success">5 × 偶數 = 10的倍數</span>
+                </div>
+            `,
+            note: "看到這些組合，先讓他們「合體」！"
+        },
+        {
+            title: "🕵️‍♂️ 隱形的「1」",
+            content: `99 × 99 + 99 <span class="hidden-one" id="secret-one">× 1</span>`,
+            note: "提取公因數：99 × (99 + 1) = <span class='highlight'>9900</span>",
+            // 特殊按鈕功能
+            actionBtn: { text: "戴上特務眼鏡", action: "revealOne()" }
+        }
+    ];
+
+    // ==========================================
+    // ⚙️ 系統邏輯區：以下通常不用動
+    // ==========================================
+    let currentIndex = 0;
+    const container = document.getElementById('app');
+
+    // 初始化畫面
+    function render() {
+        const slideData = lessonData[currentIndex];
+        
+        // 判斷是否有特殊按鈕
+        let actionBtnHtml = '';
+        if (slideData.actionBtn) {
+            actionBtnHtml = `<button class="action-btn" onclick="${slideData.actionBtn.action}">${slideData.actionBtn.text}</button>`;
+        }
+
+        container.innerHTML = `
+            <div class="slide active">
+                <h1>${slideData.title}</h1>
+                <div class="content-area">
+                    ${slideData.content}
+                    <div style="margin-top: 20px;">${actionBtnHtml}</div>
+                </div>
+                <div class="note">${slideData.note}</div>
+            </div>
+            <div class="btn-nav">
+                <button onclick="prevSlide()" ${currentIndex === 0 ? 'style="opacity:0.5;pointer-events:none"' : ''}>上一步</button>
+                <button onclick="nextSlide()" ${currentIndex === lessonData.length - 1 ? 'style="opacity:0.5;pointer-events:none"' : ''}>下一步</button>
+            </div>
+        `;
+    }
+
+    // 換頁功能
+    function nextSlide() {
+        if (currentIndex < lessonData.length - 1) {
+            currentIndex++;
+            render();
+        }
+    }
+
+    function prevSlide() {
+        if (currentIndex > 0) {
+            currentIndex--;
+            render();
+        }
+    }
+
+    // 特殊互動功能定義
+    function revealOne() {
+        const el = document.getElementById('secret-one');
+        if(el) el.classList.add('reveal-one');
+    }
+
+    // 啟動！
+    render();
+</script>
+
+</body>
+</html>
