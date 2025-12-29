@@ -1,39 +1,145 @@
-<div class="scene active" id="scene-0">
-    <h3>🌿 植物感應：生長素 vs 膨壓</h3>
-    
-    <div class="plant-stage-container" style="position: relative; width: 100%; height: 300px; background: #fdfbf7; border-radius: 15px; overflow: hidden; border: 2px solid #ddd;">
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>生物 Ch5 協調作用 (Fix)</title>
+    <style>
+        :root { --primary: #2c3e50; --accent: #27ae60; --hormone: #e74c3c; }
+        body { font-family: '微軟正黑體', sans-serif; background: #f4f7f6; margin: 0; display: flex; flex-direction: column; height: 100vh; }
         
-        <div id="tropism-setup" style="position: absolute; top: 30%; left: 20%; transition: 1s;">
-            <div class="seed" style="width: 20px; height: 20px; background: #5d4037; border-radius: 50%; position: relative; z-index: 2;"></div>
-            
-            <div class="stem-segment" id="stem-growth" style="width: 100px; height: 10px; background: #27ae60; position: absolute; top: 5px; left: 15px; transform-origin: left center; border-radius: 0 5px 5px 0; transition: 2s;">
-                <div class="hormone-dots" style="display:none; position:absolute; bottom:0; width:100%; height:4px; background:rgba(0,0,0,0.2);" title="生長素累積區"></div>
+        .nav-bar { background: var(--primary); padding: 15px; display: flex; justify-content: center; gap: 10px; }
+        .nav-btn { padding: 8px 15px; cursor: pointer; border: none; background: rgba(255,255,255,0.1); color: white; border-radius: 50px; transition: 0.3s; }
+        .nav-btn.active { background: var(--accent); transform: scale(1.1); }
+        
+        .scene { display: none; height: 100%; padding: 20px; flex-direction: column; align-items: center; }
+        .scene.active { display: flex; }
+        .desc-box { background: white; padding: 20px; border-radius: 10px; margin-top: 20px; max-width: 600px; width: 90%; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+
+        /* 植物樣式 (修復版) */
+        .plant-stage { position: relative; width: 100%; height: 300px; background: #fffcf5; border: 2px solid #ddd; border-radius: 10px; overflow: hidden; }
+        
+        /* 倒放實驗組件 */
+        .geo-setup { position: absolute; top: 40%; left: 30%; width: 200px; height: 100px; transition: 1s; display: none; }
+        
+        .seed { width: 30px; height: 30px; background: #5d4037; border-radius: 50%; position: absolute; left: 0; top: 0; z-index: 5; }
+        
+        /* 莖：向右生長 */
+        .stem-part { 
+            position: absolute; left: 15px; top: 5px; 
+            width: 100px; height: 20px; 
+            background: #27ae60; 
+            transform-origin: left center; 
+            transition: 2s; 
+            border-radius: 0 10px 10px 0;
+        }
+        
+        /* 根：向左生長 (初始狀態) */
+        .root-part { 
+            position: absolute; left: 15px; top: 5px; 
+            width: 100px; height: 10px; 
+            background: #d7ccc8; 
+            transform-origin: left center; 
+            transform: rotate(180deg); /* 轉到左邊 */
+            transition: 2s; 
+            border-radius: 0 10px 10px 0;
+            z-index: 4;
+        }
+
+        /* 含羞草樣式 */
+        .mimosa-setup { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); display: none; }
+        .mimosa-stem { width: 4px; height: 150px; background: #2e7d32; margin: 0 auto; }
+        .leaf-group { position: absolute; top: 20px; left: -40px; cursor: pointer; }
+        .leaf-blade { width: 50px; height: 20px; background: #4caf50; border-radius: 20px 0; display: inline-block; transition: 0.2s; }
+        .leaf-blade.right { border-radius: 0 20px; margin-left: -5px; }
+
+        .brand-watermark { position: fixed; bottom: 20px; right: 20px; background: rgba(26, 42, 108, 0.8); color: white; padding: 8px 15px; border-radius: 50px; font-size: 12px; pointer-events: none; }
+    </style>
+</head>
+<body>
+
+    <div class="nav-bar">
+        <button class="nav-btn active" onclick="switchScene(0)">🌿 植物感應 (修復版)</button>
+        </div>
+
+    <div class="scene active" id="scene-0">
+        <h3>🌿 植物感應：生長素 vs 膨壓</h3>
+        <div class="plant-stage">
+            <div id="geo-setup" class="geo-setup">
+                <div class="seed"></div>
+                <div id="stem" class="stem-part">
+                    <span style="position:absolute; right:-40px; top:0; font-size:12px; color:#27ae60;">莖</span>
+                </div>
+                <div id="root" class="root-part">
+                     <span style="position:absolute; right:-40px; top:0; font-size:12px; color:#8d6e63; transform: rotate(180deg);">根</span>
+                </div>
             </div>
-            
-            <div class="root-segment" id="root-growth" style="width: 80px; height: 6px; background: #d7ccc8; position: absolute; top: 7px; right: 15px; transform-origin: right center; transform: scaleX(-1); border-radius: 0 5px 5px 0; transition: 2s;">
-                <div class="hormone-dots" style="display:none; position:absolute; bottom:0; width:100%; height:4px; background:rgba(0,0,0,0.2);" title="生長素累積區"></div>
+
+            <div id="mimosa-setup" class="mimosa-setup">
+                <div class="mimosa-stem"></div>
+                <div class="leaf-group" onclick="triggerMimosa()">
+                    <div id="leaf-l" class="leaf-blade"></div>
+                    <div id="leaf-r" class="leaf-blade right"></div>
+                </div>
             </div>
         </div>
 
-        <div id="mimosa-setup" style="display:none; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);">
-            <div style="width: 4px; height: 100px; background: #2e7d32; margin: 0 auto;"></div>
-            <div class="mimosa-leaf-group" id="mimosa-leaves" style="position: absolute; top: 20px; left: -30px; cursor: pointer;" onclick="triggerMimosa()">
-                <div class="leaf-blade" style="width: 60px; height: 20px; background: #4caf50; border-radius: 20px 0; transform-origin: right center; transition: 0.2s;"></div>
-                <div class="leaf-blade" style="width: 60px; height: 20px; background: #4caf50; border-radius: 0 20px; position: absolute; right: -60px; top: 0; transform-origin: left center; transition: 0.2s;"></div>
-            </div>
-            <div style="text-align: center; margin-top: 5px; font-size: 12px; color: #666;">點擊葉子</div>
+        <div class="desc-box">
+            <button onclick="setMode('geo')">🌎 向地性實驗</button>
+            <button onclick="setMode('thigmo')">🖐️ 含羞草實驗</button>
+            <button onclick="resetPlant()">🔄 重置</button>
+            <p id="plant-log" style="text-align:left; font-size:0.9rem; margin-top:15px;"></p>
         </div>
-
     </div>
 
-    <div class="desc-box">
-        <div class="btn-group">
-            <button onclick="setMode('geo')">🌎 向地性實驗 (生長素)</button>
-            <button onclick="setMode('thigmo')">🖐️ 含羞草實驗 (膨壓)</button>
-            <button onclick="resetPlantSim()">🔄 重置</button>
-        </div>
-        <div id="plant-explanation" style="margin-top: 15px; text-align: left; font-size: 0.95rem; line-height: 1.6; min-height: 80px;">
-            請選擇一個實驗來觀察植物的反應。
-        </div>
-    </div>
-</div>
+    <div class="brand-watermark">STEM INSIGHT</div>
+
+    <script>
+        function setMode(mode) {
+            resetPlant();
+            if(mode === 'geo') {
+                document.getElementById('geo-setup').style.display = 'block';
+                document.getElementById('mimosa-setup').style.display = 'none';
+                document.getElementById('plant-log').innerHTML = "植物水平放置中...<br>等待生長素作用...";
+                
+                setTimeout(() => {
+                    // 關鍵修正：莖往上(-45deg)，根往下(+180+45 = 225deg)
+                    document.getElementById('stem').style.transform = 'rotate(-45deg)';
+                    document.getElementById('stem').style.borderRadius = '0 0 50px 0'; // 下面長得快
+                    
+                    document.getElementById('root').style.transform = 'rotate(225deg)'; // 180(向左) + 45(向下彎)
+                    document.getElementById('root').style.borderRadius = '0 50px 0 0'; // 上面長得快(下面被抑制)
+                    
+                    document.getElementById('plant-log').innerHTML = `
+                        <b>結果：</b><br>
+                        1. 莖 (背地性)：生長素沈在下面 → 長得快 → <b>向上彎</b>。<br>
+                        2. 根 (向地性)：生長素沈在下面 → 濃度太高被抑制 → <b>向下彎</b>。
+                    `;
+                }, 1000);
+
+            } else {
+                document.getElementById('geo-setup').style.display = 'none';
+                document.getElementById('mimosa-setup').style.display = 'block';
+                document.getElementById('plant-log').innerHTML = "點擊含羞草葉子，觀察<b>膨壓</b>變化。";
+            }
+        }
+
+        function triggerMimosa() {
+            document.getElementById('leaf-l').style.transform = 'rotate(30deg) scaleX(0.5)';
+            document.getElementById('leaf-r').style.transform = 'rotate(-30deg) scaleX(0.5)';
+            document.getElementById('plant-log').innerHTML = "<b>閉合！</b><br>這是水分流失造成的，速度快，與生長無關。";
+        }
+
+        function resetPlant() {
+            // 重置樣式
+            document.getElementById('stem').style.transform = 'rotate(0deg)';
+            document.getElementById('stem').style.borderRadius = '0 10px 10px 0';
+            document.getElementById('root').style.transform = 'rotate(180deg)';
+            document.getElementById('root').style.borderRadius = '0 10px 10px 0';
+            
+            document.getElementById('leaf-l').style.transform = 'none';
+            document.getElementById('leaf-r').style.transform = 'none';
+            document.getElementById('plant-log').innerText = "";
+        }
+    </script>
+</body>
+</html>
