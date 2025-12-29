@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>魔法量角器 | STEM INSIGHT</title>
+    <style>
+        :root { --primary: #1a2a6c; --accent: #f39c12; --bg: #f4f7f6; }
+        body { font-family: '微軟正黑體', sans-serif; background: var(--bg); margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        
+        .brand-watermark { position: fixed; bottom: 20px; right: 20px; background: rgba(26, 42, 108, 0.8); color: white; padding: 8px 15px; border-radius: 50px; font-size: 12px; pointer-events: none; z-index: 100; }
+        
+        header { width: 100%; background: var(--primary); color: white; padding: 15px 0; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        h2 { margin: 0; letter-spacing: 1px; }
+
+        .container { background: white; width: 90%; max-width: 500px; margin-top: 30px; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center; }
+
+        /* 視覺區 */
+        .visual-stage { position: relative; width: 300px; height: 300px; margin: 0 auto 20px; }
+        
+        /* 量角器背景 */
+        .protractor { position: absolute; width: 100%; height: 100%; border-radius: 50%; border: 2px solid #eee; background: radial-gradient(circle, #fff 60%, #f9f9f9 61%); }
+        .tick { position: absolute; top: 0; left: 50%; width: 1px; height: 50%; background: #ddd; transform-origin: bottom center; }
+        .tick.major { height: 100%; background: #ccc; width: 2px; }
+
+        /* 扇形 SVG */
+        svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; transform: rotate(-90deg); /* 讓0度在正上方 */ }
+        path { fill: rgba(243, 156, 18, 0.4); stroke: var(--accent); stroke-width: 3; transition: d 0.1s; }
+        
+        /* 數據卡片 */
+        .data-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px; }
+        .data-card { background: #f8f9fa; padding: 15px; border-radius: 10px; border-left: 4px solid var(--primary); }
+        .data-title { font-size: 0.9rem; color: #777; margin-bottom: 5px; }
+        .data-value { font-size: 1.8rem; font-weight: bold; color: var(--primary); }
+        .fraction { color: #e74c3c; }
+
+        /* 滑桿 */
+        input[type=range] { width: 100%; margin: 20px 0; cursor: pointer; }
+        .hint { color: #666; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h2>STEM INSIGHT | 數學實驗室</h2>
+</header>
+
+<div class="container">
+    <div class="visual-stage">
+        <div class="protractor">
+            <div class="tick major"></div>
+            <div class="tick major" style="transform: rotate(90deg)"></div>
+        </div>
+        <svg viewBox="0 0 100 100">
+            <path id="sector" d="M 50 50 L 50 0 A 50 50 0 0 1 100 50 Z"></path>
+        </svg>
+    </div>
+
+    <div class="data-grid">
+        <div class="data-card">
+            <div class="data-title">圓心角 (Angle)</div>
+            <div class="data-value" id="angle-val">90°</div>
+        </div>
+        <div class="data-card" style="border-left-color: #e74c3c;">
+            <div class="data-title">佔了幾分之幾圓</div>
+            <div class="data-value fraction" id="frac-val">1/4</div>
+        </div>
+    </div>
+
+    <input type="range" min="0" max="360" value="90" id="slider" oninput="updateSector(this.value)">
+    
+    <div class="hint">👉 試試看：拉到 180° 是幾分之幾？</div>
+</div>
+
+<div class="brand-watermark">STEM INSIGHT</div>
+
+<script>
+    function updateSector(deg) {
+        deg = parseInt(deg);
+        if(deg === 0) deg = 0.1;
+        if(deg === 360) deg = 359.9;
+
+        // 更新數據
+        document.getElementById('angle-val').innerText = deg + "°";
+        document.getElementById('frac-val').innerText = getFraction(deg);
+
+        // 繪製扇形 (SVG Math)
+        // 中心(50,50), 半徑50. 0度在正上方(因為CSS轉了-90度)
+        const r = 50;
+        const rad = (deg * Math.PI) / 180;
+        const x = 50 + r * Math.cos(rad);
+        const y = 50 + r * Math.sin(rad);
+        
+        // 大弧判定
+        const largeArc = deg > 180 ? 1 : 0;
+
+        // SVG Path指令: MoveTo中心 -> LineTo起點(右側) -> ArcTo終點 -> Close
+        // 注意：這裡的起點相對於SVG座標是(100,50)，因為SVG預設0度是向右
+        const d = `M 50 50 L 100 50 A 50 50 0 ${largeArc} 1 ${x} ${y} Z`;
+        
+        // 因為CSS旋轉了svg，我們需要修正path的繪製邏輯讓它看起來是順時針
+        // 這裡直接用簡單的方式：讓 path 跟著 slider 動
+        // 為了讓數學直覺正確 (0度在正上方或正右方)，我們調整一下：
+        // 這裡設定：0度在正上方 (12點鐘)，順時針旋轉
+        
+        // 重新計算 (修正版):
+        // 0度(Start) = (50, 0)
+        // 終點由 sin/cos 計算 (注意座標系轉換)
+        // x = 50 + 50 * sin(rad)
+        // y = 50 - 50 * cos(rad)
+        
+        const x2 = 50 + 50 * Math.sin(rad);
+        const y2 = 50 - 50 * Math.cos(rad);
+        
+        const d2 = `M 50 50 L 50 0 A 50 50 0 ${largeArc} 1 ${x2} ${y2} Z`;
+        
+        // 移除 CSS 的 rotate(-90deg) 效果，直接用算出來的 d2
+        document.querySelector('svg').style.transform = 'none';
+        document.getElementById('sector').setAttribute('d', d2);
+    }
+
+    // 計算分數 (GCD演算法)
+    function getFraction(deg) {
+        if(deg >= 359) return "1";
+        const gcd = (a, b) => b ? gcd(b, a % b) : a;
+        const common = gcd(deg, 360);
+        return `${deg/common} / ${360/common}`;
+    }
+</script>
+</body>
+</html>

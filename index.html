@@ -2,26 +2,238 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>我的數位教學系統</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STEM INSIGHT | 數位教學中控台</title>
     <style>
-        body { font-family: sans-serif; padding: 50px; background: #f0f2f5; text-align: center; }
-        .menu { display: grid; gap: 20px; max-width: 600px; margin: auto; }
-        .card { background: white; padding: 20px; border-radius: 10px; text-decoration: none; color: #333; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: 0.3s; display: block; }
-        .card:hover { transform: translateY(-5px); background: #fffdfd; }
-        h2 { margin: 0; color: #e74c3c; }
+        :root {
+            --brand-dark: #1a2a6c;
+            --brand-light: #2c3e50;
+            --accent: #f39c12;
+            --math-color: #3498db;
+            --science-color: #27ae60;
+            --bg-color: #f4f6f8;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            color: #333;
+        }
+
+        /* 頂部品牌區 */
+        header {
+            background: linear-gradient(135deg, var(--brand-dark), var(--brand-light));
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .brand-title {
+            font-size: 2.2rem;
+            font-weight: 800;
+            letter-spacing: 3px;
+            margin: 0;
+        }
+
+        .brand-subtitle {
+            font-size: 1rem;
+            opacity: 0.8;
+            margin-top: 8px;
+            font-weight: 300;
+        }
+
+        /* 容器 */
+        .container {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        /* 分區標題 */
+        .section-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            margin-top: 40px;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 10px;
+        }
+
+        .section-tag {
+            background: var(--brand-dark);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+
+        .section-title {
+            font-size: 1.4rem;
+            color: var(--brand-light);
+            font-weight: bold;
+        }
+
+        /* 卡片網格 */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        /* 卡片設計 */
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid #eee;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            border-color: var(--accent);
+        }
+
+        .card-icon {
+            font-size: 2rem;
+            margin-bottom: 15px;
+        }
+
+        .card h3 {
+            margin: 0 0 10px 0;
+            font-size: 1.1rem;
+            color: var(--brand-dark);
+        }
+
+        .card p {
+            font-size: 0.9rem;
+            color: #666;
+            line-height: 1.5;
+            margin: 0 0 15px 0;
+        }
+
+        /* 學科標籤 */
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: white;
+            align-self: flex-start;
+        }
+
+        .badge.math { background-color: var(--math-color); }
+        .badge.bio { background-color: var(--science-color); }
+        .badge.physics { background-color: #8e44ad; }
+
+        /* 頁尾 */
+        footer {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+            font-size: 0.85rem;
+            margin-top: 50px;
+        }
     </style>
 </head>
 <body>
-    <div class="menu">
-        <h1>🎓 數位課程清單</h1>
-        <a href="lesson-01-distributive/index.html" class="card">
-            <h2>第 01 課：分配律與湊整數</h2>
-            <p>適用：五年級基礎 / 私中進階</p>
-        </a>
-        <a href="lesson-02-geometry/index.html" class="card">
-            <h2>第 02 課：複合圖形拆解</h2>
-            <p>適用：五年級（圖像化邏輯強化）</p>
-        </a>
+
+    <header>
+        <div class="brand-title">STEM INSIGHT</div>
+        <div class="brand-subtitle">智慧教學資源中控台</div>
+    </header>
+
+    <div class="container">
+
+        <div class="section-header">
+            <span class="section-tag">五年級</span>
+            <span class="section-title">個別指導：黃思誠</span>
+        </div>
+        <div class="grid">
+            <a href="lesson-01-distributive/index.html" class="card">
+                <div>
+                    <div class="card-icon">🍔</div>
+                    <h3>L01 分配律圖像化</h3>
+                    <p>利用麥當勞套餐概念，建立括號展開的直覺邏輯。</p>
+                </div>
+                <span class="badge math">MATH</span>
+            </a>
+            <a href="lesson-02-geometry/index.html" class="card">
+                <div>
+                    <div class="card-icon">🧩</div>
+                    <h3>L02 幾何拆解工廠</h3>
+                    <p>複合圖形的動態分割與面積計算視覺化。</p>
+                </div>
+                <span class="badge math">MATH</span>
+            </a>
+            <a href="lesson-04-sector/index.html" class="card">
+                <div>
+                    <div class="card-icon">🍕</div>
+                    <h3>L04 魔法量角器</h3>
+                    <p>扇形、圓心角與分數的連動關係模擬。</p>
+                </div>
+                <span class="badge math">MATH</span>
+            </a>
+        </div>
+
+        <div class="section-header">
+            <span class="section-tag">國二</span>
+            <span class="section-title">個別指導：沛妤</span>
+        </div>
+        <div class="grid">
+            <a href="lesson-03-science/index.html" class="card">
+                <div>
+                    <div class="card-icon">⚛️</div>
+                    <h3>L03 原子與熱量實驗室</h3>
+                    <p>原子結構模型建構 與 比熱熱量變化模擬。</p>
+                </div>
+                <span class="badge physics">PHY/CHEM</span>
+            </a>
+        </div>
+
+        <div class="section-header">
+            <span class="section-tag">七年級</span>
+            <span class="section-title">段考衝刺團班</span>
+        </div>
+        <div class="grid">
+            <a href="lesson-05-math7/index.html" class="card">
+                <div>
+                    <div class="card-icon">⚖️</div>
+                    <h3>L05 等量公理天平</h3>
+                    <p>一元一次方程式移項法則的動態平衡演示。</p>
+                </div>
+                <span class="badge math">MATH</span>
+            </a>
+            <a href="lesson-06-bio-ch5/index.html" class="card">
+                <div>
+                    <div class="card-icon">🧠</div>
+                    <h3>L06 生物協調戰情室</h3>
+                    <p>整合神經傳導、內分泌恆定與植物感應的全章節攻略。</p>
+                </div>
+                <span class="badge bio">BIO</span>
+            </a>
+        </div>
+
     </div>
+
+    <footer>
+        &copy; 2025 STEM INSIGHT. All Rights Reserved.<br>
+        Powered by Digital Logic Engine
+    </footer>
+
 </body>
 </html>

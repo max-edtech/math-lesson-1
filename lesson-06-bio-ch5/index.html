@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>Ch5 協調作用戰情中心 | STEM INSIGHT</title>
+    <style>
+        :root { --primary: #2c3e50; --accent: #27ae60; --nerve: #f1c40f; --hormone: #e74c3c; }
+        body { font-family: '微軟正黑體', sans-serif; background: #f4f7f6; margin: 0; display: flex; flex-direction: column; height: 100vh; }
+        
+        /* 頂部導航 */
+        .nav-bar { background: var(--primary); padding: 15px; display: flex; justify-content: center; gap: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .nav-btn { padding: 10px 25px; cursor: pointer; border: none; background: rgba(255,255,255,0.1); color: white; border-radius: 50px; font-weight: bold; transition: 0.3s; }
+        .nav-btn.active { background: var(--accent); transform: scale(1.1); }
+        .nav-btn:hover { background: rgba(255,255,255,0.3); }
+
+        /* 內容區 */
+        .content { flex: 1; position: relative; overflow: hidden; }
+        .scene { display: none; height: 100%; padding: 20px; box-sizing: border-box; flex-direction: column; align-items: center; justify-content: center; animation: fadeIn 0.5s; }
+        .scene.active { display: flex; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- Scene 1: 神經系統 (反射路徑) --- */
+        .pathway-container { display: flex; align-items: center; gap: 10px; margin-top: 20px; }
+        .node { width: 80px; height: 80px; background: white; border: 3px solid var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; position: relative; box-shadow: 0 5px 15px rgba(0,0,0,0.1); z-index: 2; text-align: center; font-size: 14px; }
+        .arrow { font-size: 2rem; color: #ccc; transition: 0.3s; }
+        
+        .signal { position: absolute; width: 20px; height: 20px; background: var(--nerve); border-radius: 50%; top: 30px; left: 30px; display: none; box-shadow: 0 0 10px var(--nerve); z-index: 3; }
+        
+        /* 動畫類別 */
+        .activate { border-color: var(--nerve); background: #fffbe6; transform: scale(1.1); transition: 0.2s; }
+        .path-active { color: var(--nerve); }
+
+        /* --- Scene 2: 內分泌 (血糖) --- */
+        .chart-container { width: 80%; height: 300px; background: white; border-radius: 15px; position: relative; border-left: 2px solid #333; border-bottom: 2px solid #333; margin-top: 20px; }
+        .sugar-level { position: absolute; left: 0; bottom: 50%; width: 100%; height: 4px; background: #eee; }
+        .current-level { position: absolute; left: 0; width: 20px; height: 20px; background: var(--hormone); border-radius: 50%; bottom: 50%; transition: bottom 1s cubic-bezier(0.4, 0, 0.2, 1), left 5s linear; }
+        .organ-btn { margin: 5px; padding: 10px; background: white; border: 2px solid var(--hormone); border-radius: 10px; cursor: pointer; }
+        .organ-btn:hover { background: #ffebee; }
+
+        /* --- Scene 3: 植物感應 --- */
+        .plant-stage { width: 300px; height: 400px; position: relative; border-bottom: 10px solid #795548; }
+        .stem { width: 20px; height: 300px; background: var(--accent); position: absolute; bottom: 0; left: 140px; border-radius: 10px 10px 0 0; transform-origin: bottom center; transition: 1s; }
+        .leaf { width: 60px; height: 30px; background: var(--accent); border-radius: 30px 0 30px 0; position: absolute; }
+        .sun { width: 60px; height: 60px; background: #f1c40f; border-radius: 50%; position: absolute; top: 20px; cursor: pointer; transition: 0.5s; box-shadow: 0 0 20px #f1c40f; }
+        
+        .auxin-dots { position: absolute; width: 4px; height: 4px; background: #2c3e50; border-radius: 50%; }
+
+        .brand-watermark { position: fixed; bottom: 20px; right: 20px; background: rgba(26, 42, 108, 0.8); color: white; padding: 8px 15px; border-radius: 50px; font-size: 12px; pointer-events: none; }
+        
+        h2 { color: #1a2a6c; border-bottom: 3px solid var(--accent); padding-bottom: 5px; }
+        .desc-box { background: white; padding: 15px; border-radius: 10px; margin-top: 20px; max-width: 600px; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+    </style>
+</head>
+<body>
+
+    <div class="nav-bar">
+        <button class="nav-btn active" onclick="switchScene(0)">⚡ 神經系統 (5-2)</button>
+        <button class="nav-btn" onclick="switchScene(1)">🩸 內分泌 (5-3)</button>
+        <button class="nav-btn" onclick="switchScene(2)">🌿 植物感應 (5-4)</button>
+    </div>
+
+    <div class="content">
+        <div class="scene active" id="scene-0">
+            <h2>🧠 刺激與反應路徑模擬</h2>
+            <div class="pathway-container">
+                <div class="node" id="n1">受器<br>(皮膚)</div> <div class="arrow">➜</div>
+                <div class="node" id="n2">感覺<br>神經</div> <div class="arrow">➜</div>
+                <div class="node" id="n3" style="border-color: #e74c3c">中樞<br>(腦/脊髓)</div> <div class="arrow">➜</div>
+                <div class="node" id="n4">運動<br>神經</div> <div class="arrow">➜</div>
+                <div class="node" id="n5">動器<br>(肌肉)</div>
+            </div>
+            <div class="desc-box">
+                <p id="neuro-log">點擊下方按鈕，觀察訊息如何傳遞！</p>
+                <button class="organ-btn" onclick="triggerReflex()">🔥 摸到熱鍋 (脊髓反射)</button>
+                <button class="organ-btn" onclick="triggerConscious()">🦟 看到蚊子 (大腦意識)</button>
+            </div>
+        </div>
+
+        <div class="scene" id="scene-1">
+            <h2>🍩 血糖恆定機制 (胰島素 vs 升糖素)</h2>
+            <div class="chart-container">
+                <div style="position: absolute; top: 10px; left: 10px; color: #aaa;">血糖濃度 High</div>
+                <div style="position: absolute; bottom: 10px; left: 10px; color: #aaa;">血糖濃度 Low</div>
+                <div class="sugar-level" style="border-top: 1px dashed #ccc;"></div> <div class="current-level" id="glucose-ball"></div>
+            </div>
+            <div class="desc-box">
+                <p>目前狀態：<span id="sugar-status" style="font-weight:bold;">正常</span></p>
+                <button class="organ-btn" onclick="eatMeal()">🍱 吃大餐 (血糖↑)</button>
+                <button class="organ-btn" onclick="exercise()">🏃 劇烈運動 (血糖↓)</button>
+                <br>
+                <span style="font-size: 0.8rem; color: #666;">觀察胰島素(降)與升糖素(升)如何運作</span>
+            </div>
+        </div>
+
+        <div class="scene" id="scene-2">
+            <h2>🌻 向光性實驗 (生長素不均)</h2>
+            <div class="plant-stage">
+                <div class="sun" id="sun" style="left: 120px;"></div>
+                <div class="stem" id="stem">
+                    <div class="leaf" style="top:50px; left: -60px;"></div>
+                    <div class="leaf" style="top:120px; right: -60px;"></div>
+                </div>
+            </div>
+            <div class="desc-box">
+                <button class="organ-btn" onclick="moveSun('left')">⬅️ 移到左邊</button>
+                <button class="organ-btn" onclick="moveSun('center')">⬆️ 移到頭頂</button>
+                <button class="organ-btn" onclick="moveSun('right')">➡️ 移到右邊</button>
+                <p>生長素怕光，會躲到背光面，導致背光面長得快！</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="brand-watermark">STEM INSIGHT</div>
+
+    <script>
+        // 切換場景
+        function switchScene(index) {
+            document.querySelectorAll('.scene').forEach((el, i) => {
+                el.classList.toggle('active', i === index);
+            });
+            document.querySelectorAll('.nav-btn').forEach((el, i) => {
+                el.classList.toggle('active', i === index);
+            });
+        }
+
+        // --- 神經系統邏輯 ---
+        function triggerReflex() {
+            runPathway("反射動作：不經過大腦，速度快！", 500); // 脊髓反射快
+        }
+        function triggerConscious() {
+            runPathway("意識動作：傳到大腦判斷，再傳出來，速度較慢。", 1000); // 大腦處理慢
+        }
+
+        async function runPathway(msg, speed) {
+            const nodes = ['n1', 'n2', 'n3', 'n4', 'n5'];
+            document.getElementById('neuro-log').innerText = msg;
+            
+            // 重置
+            nodes.forEach(id => document.getElementById(id).classList.remove('activate'));
+            
+            for (let i = 0; i < nodes.length; i++) {
+                let node = document.getElementById(nodes[i]);
+                node.classList.add('activate');
+                await new Promise(r => setTimeout(r, speed / 5)); // 模擬傳導時間
+                node.classList.remove('activate');
+            }
+            document.getElementById('n5').classList.add('activate'); // 動器最後亮一下
+        }
+
+        // --- 內分泌邏輯 ---
+        let sugarY = 50; // %
+        const ball = document.getElementById('glucose-ball');
+        const status = document.getElementById('sugar-status');
+
+        function updateBall() {
+            ball.style.bottom = sugarY + "%";
+            if(sugarY > 60) {
+                status.innerText = "過高！胰島素分泌中... (將糖轉為肝糖)";
+                status.style.color = "#e74c3c";
+                setTimeout(() => { sugarY = 50; updateBall(); }, 2000); // 自動回穩
+            } else if (sugarY < 40) {
+                status.innerText = "過低！升糖素/腎上腺素分泌中... (分解肝糖)";
+                status.style.color = "#2980b9";
+                setTimeout(() => { sugarY = 50; updateBall(); }, 2000); // 自動回穩
+            } else {
+                status.innerText = "正常 (恆定狀態)";
+                status.style.color = "#27ae60";
+            }
+        }
+
+        function eatMeal() { sugarY = 85; updateBall(); }
+        function exercise() { sugarY = 20; updateBall(); }
+
+        // --- 植物感應邏輯 ---
+        function moveSun(pos) {
+            const sun = document.getElementById('sun');
+            const stem = document.getElementById('stem');
+            
+            if(pos === 'left') {
+                sun.style.left = '20px';
+                stem.style.transform = 'rotate(-15deg)'; // 向左彎
+            } else if (pos === 'right') {
+                sun.style.left = '220px';
+                stem.style.transform = 'rotate(15deg)'; // 向右彎
+            } else {
+                sun.style.left = '120px';
+                stem.style.transform = 'rotate(0deg)'; // 直立
+            }
+        }
+    </script>
+</body>
+</html>
