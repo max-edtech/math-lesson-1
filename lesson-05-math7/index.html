@@ -2,117 +2,115 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>七年級數學 | 方程式實戰 (High Clearance)</title>
+    <title>七年級數學 | 自動化實戰系統 (Auto-Tutor V2)</title>
     <style>
-        :root { --primary: #3498db; --danger: #e74c3c; --success: #2ecc71; --dark: #2c3e50; --bg: #f5f7fa; }
+        :root { --primary: #3498db; --danger: #e74c3c; --success: #2ecc71; --dark: #2c3e50; --bg: #f5f7fa; --purple: #9b59b6; }
         body { font-family: 'Segoe UI', '微軟正黑體', sans-serif; background: var(--bg); margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
         
         .brand-watermark { position: fixed; bottom: 20px; right: 20px; background: rgba(26, 42, 108, 0.8); color: white; padding: 8px 15px; border-radius: 50px; font-size: 12px; pointer-events: none; z-index: 1000; }
         
-        .tabs { display: flex; width: 100%; background: white; padding: 15px 0; justify-content: center; gap: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); z-index: 100; position: relative; }
-        .tab-btn { background: #eee; color: #555; border: none; padding: 10px 25px; cursor: pointer; font-size: 1rem; border-radius: 50px; font-weight: bold; transition: 0.2s; }
+        /* 頂部控制列 */
+        .top-bar { width: 100%; background: white; padding: 10px 0; display: flex; justify-content: center; gap: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); z-index: 100; position: relative; }
+        .tab-btn { background: #eee; color: #555; border: none; padding: 10px 20px; cursor: pointer; font-size: 1rem; border-radius: 50px; font-weight: bold; transition: 0.2s; }
         .tab-btn.active { background: var(--dark); color: white; transform: scale(1.05); }
+        .print-btn { background: var(--purple); color: white; display: flex; align-items: center; gap: 5px; }
 
-        .container { width: 95%; max-width: 900px; background: white; margin-top: 20px; border-radius: 15px; padding: 30px; display: none; min-height: 600px; padding-bottom: 50px; margin-bottom: 50px; }
+        .container { width: 95%; max-width: 900px; background: white; margin-top: 20px; border-radius: 15px; padding: 30px; display: none; min-height: 600px; padding-bottom: 80px; margin-bottom: 50px; position: relative; }
         .container.active { display: block; animation: fadeIn 0.3s; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        h2 { margin-top: 0; color: var(--dark); border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        h2 { margin-top: 0; color: var(--dark); border-bottom: 2px solid #eee; padding-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .score-badge { font-size: 0.9rem; background: #eee; padding: 5px 10px; border-radius: 10px; color: #666; }
 
-        /* --- 天平區 (防遮擋修正) --- */
-        .balance-wrapper {
-            position: relative; 
-            width: 100%; 
-            height: 500px; /* 暴力加高到 500px，確保空間足夠 */
-            background: linear-gradient(to bottom, #fdfdfd, #f1f1f1); 
-            border: 1px solid #ddd; 
-            border-radius: 10px; 
-            margin-top: 20px; 
-            overflow: visible; /* 允許溢出顯示 */
-        }
-
-        /* 支點：大幅上移 (距離底部 200px) */
-        .pivot {
-            position: absolute; bottom: 200px; left: 50%; transform: translateX(-50%);
-            width: 0; height: 0; border-left: 30px solid transparent; border-right: 30px solid transparent; border-bottom: 60px solid var(--dark); z-index: 2;
-        }
-        
-        /* 橫桿：對應支點尖端 (200 + 60 = 260px) */
-        .beam-container {
-            position: absolute; width: 500px; height: 12px; background: var(--dark); border-radius: 6px;
-            bottom: 260px; left: 50%; margin-left: -250px;
-            transform-origin: 50% 50%; transition: transform 0.8s cubic-bezier(0.5, 1.5, 0.5, 1); z-index: 3;
-        }
+        /* --- 天平區 --- */
+        .balance-wrapper { position: relative; width: 100%; height: 450px; background: linear-gradient(to bottom, #fdfdfd, #f1f1f1); border: 1px solid #ddd; border-radius: 10px; margin-top: 20px; overflow: visible; }
+        .pivot { position: absolute; bottom: 180px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 30px solid transparent; border-right: 30px solid transparent; border-bottom: 60px solid var(--dark); z-index: 2; }
+        .beam-container { position: absolute; width: 500px; height: 12px; background: var(--dark); border-radius: 6px; bottom: 240px; left: 50%; margin-left: -250px; transform-origin: 50% 50%; transition: transform 0.8s cubic-bezier(0.5, 1.5, 0.5, 1); z-index: 3; }
         .beam-container.tilt-cw { transform: rotate(15deg); }
-        
-        /* 繩子 */
         .string { width: 4px; height: 80px; background: #95a5a6; position: absolute; top: 6px; }
         .string.left { left: 20px; } .string.right { right: 20px; }
+        .pan { width: 140px; height: 100px; border: 4px solid var(--dark); border-top: none; background: rgba(255,255,255,0.95); position: absolute; top: 80px; left: 50%; transform: translateX(-50%); display: flex; flex-wrap: wrap-reverse; justify-content: center; align-content: flex-start; padding: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
         
-        /* 托盤 */
-        .pan {
-            width: 140px; height: 100px; border: 4px solid var(--dark); border-top: none;
-            background: rgba(255,255,255,0.95); position: absolute; top: 80px; left: 50%; transform: translateX(-50%);
-            display: flex; flex-wrap: wrap-reverse; justify-content: center; align-content: flex-start; padding: 8px; 
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-        
+        .block-x { width: 32px; height: 32px; background: var(--danger); color: white; margin: 3px; display: flex; align-items: center; justify-content: center; font-weight: bold; border-radius: 4px; border: 1px solid #c0392b; }
+        .block-1 { width: 24px; height: 24px; background: var(--primary); color: white; margin: 3px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; border: 1px solid #2980b9; transition: 0.5s; }
+        .vanish { opacity: 0; transform: scale(0); }
+
         /* 結果氣泡 */
-        .result-bubble {
-            position: absolute; top: 20%; left: 50%; transform: translate(-50%, -50%) scale(0);
-            background: rgba(255, 255, 255, 0.95); padding: 15px 30px; border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2); text-align: center; font-size: 1.4rem; font-weight: bold;
-            z-index: 999; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); pointer-events: none;
-            border: 4px solid var(--dark); width: 60%;
-        }
+        .result-bubble { position: absolute; top: 10%; left: 50%; transform: translate(-50%, -50%) scale(0); background: rgba(255, 255, 255, 0.95); padding: 15px 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); text-align: center; font-size: 1.4rem; font-weight: bold; z-index: 999; transition: 0.4s; pointer-events: none; border: 4px solid var(--dark); width: 60%; }
         .result-bubble.show { transform: translate(-50%, -50%) scale(1); }
         .result-bubble.correct { border-color: var(--success); color: var(--success); }
         .result-bubble.wrong { border-color: var(--danger); color: var(--danger); }
 
-        .block-x { width: 32px; height: 32px; background: var(--danger); color: white; margin: 3px; display: flex; align-items: center; justify-content: center; font-weight: bold; border-radius: 4px; box-shadow: 2px 2px 0 rgba(0,0,0,0.1); border: 1px solid #c0392b; }
-        .block-1 { width: 24px; height: 24px; background: var(--primary); color: white; margin: 3px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; border: 1px solid #2980b9; transition: 0.5s; box-shadow: 1px 1px 0 rgba(0,0,0,0.1); }
-        .vanish { opacity: 0; transform: scale(0); }
-
-        /* --- 分數區 --- */
+        /* --- 分數與翻譯區 --- */
         .complex-frac-box { font-size: 1.8rem; text-align: center; margin: 30px 0; font-family: 'Times New Roman', serif; }
         .frac { display: inline-block; vertical-align: middle; text-align: center; }
         .frac .top { border-bottom: 2px solid black; display: block; padding: 0 5px; }
         .frac .btm { display: block; padding: 2px 0; }
-        .step-row { 
-            background: #fff; border: 2px solid #eee; padding: 15px; border-radius: 10px; 
-            font-size: 1.4rem; font-weight: bold; width: 80%; text-align: center; margin: 10px auto;
-            opacity: 0.3; transition: 0.5s; transform: translateY(10px);
-        }
+        .step-row { background: #fff; border: 2px solid #eee; padding: 15px; border-radius: 10px; font-size: 1.4rem; font-weight: bold; width: 80%; text-align: center; margin: 10px auto; opacity: 0.3; transition: 0.5s; transform: translateY(10px); }
         .step-row.active { opacity: 1; transform: translateY(0); border-color: var(--primary); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
-        .highlight-red { color: var(--danger); font-weight: bold; }
-
-        /* --- 翻譯機區 --- */
-        .wp-box { background: #fffbe6; padding: 20px; border-left: 6px solid #f1c40f; font-size: 1.4rem; line-height: 1.8; border-radius: 8px; }
-        .key-text { border-bottom: 3px solid #ccc; cursor: pointer; padding: 0 4px; }
-        .key-text:hover { background: rgba(0,0,0,0.05); }
+        
+        .wp-box { background: #fffbe6; padding: 20px; border-left: 6px solid #f1c40f; font-size: 1.6rem; line-height: 1.8; border-radius: 8px; margin-bottom: 20px; }
+        .key-text { border-bottom: 3px solid #ccc; cursor: pointer; padding: 0 4px; transition: 0.2s; }
+        .key-text:hover { background: rgba(0,0,0,0.05); border-color: #f39c12; }
         .key-text.filled { background: var(--success); color: white; border-color: transparent; border-radius: 4px; }
-        .slot-row { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; background: var(--dark); padding: 15px; border-radius: 10px; color: white; align-items: center; justify-content: center; }
-        .slot { width: 60px; height: 45px; border: 2px dashed #7f8c8d; display: flex; align-items: center; justify-content: center; cursor: pointer; background: rgba(255,255,255,0.1); font-size: 1.2rem; }
-        .slot.filled { background: white; color: var(--dark); border-style: solid; }
+        
+        .slot-row { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; background: var(--dark); padding: 15px; border-radius: 10px; color: white; align-items: center; justify-content: center; min-height: 80px; }
+        .slot { width: 70px; height: 50px; border: 2px dashed #7f8c8d; display: flex; align-items: center; justify-content: center; cursor: pointer; background: rgba(255,255,255,0.1); font-size: 1.4rem; }
+        .slot.filled { background: white; color: var(--dark); border-style: solid; font-weight: bold; }
 
-        /* 按鈕樣式 */
+        /* 按鈕系統 */
+        .controls { text-align: center; margin-top: 30px; }
         .action-btn { padding: 12px 24px; border: none; border-radius: 8px; font-size: 1.1rem; cursor: pointer; font-weight: bold; margin: 10px; color: white; transition: 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .action-btn:active { transform: scale(0.95); }
-        .btn-r { background: var(--danger); } .btn-g { background: var(--success); } .btn-b { background: #3498db; } .btn-y { background: #f39c12; color: #333; }
+        .btn-r { background: var(--danger); } 
+        .btn-g { background: var(--success); } 
+        .btn-b { background: #3498db; }
+        
+        /* 閉鎖模式：下一題按鈕 */
+        .next-btn { 
+            position: absolute; bottom: 20px; right: 20px; 
+            background: var(--purple); color: white; 
+            padding: 15px 30px; border-radius: 50px; 
+            font-size: 1.2rem; font-weight: bold; border: none; 
+            box-shadow: 0 5px 15px rgba(155, 89, 182, 0.4); cursor: pointer;
+            display: none; /* 預設隱藏 */
+            animation: bounceIn 0.5s;
+        }
+        .next-btn:hover { background: #8e44ad; transform: scale(1.05); }
+        @keyframes bounceIn { 0% { opacity: 0; transform: scale(0.3); } 50% { transform: scale(1.05); } 70% { transform: scale(0.9); } 100% { opacity: 1; transform: scale(1); } }
+
+        /* --- 列印模式 (Print CSS) --- */
+        @media print {
+            .top-bar, .controls, .next-btn, .brand-watermark { display: none !important; }
+body { 
+    background: white; 
+    -webkit-print-color-adjust: exact; /* 針對舊版 Chrome/Safari */
+    print-color-adjust: exact;         /* 標準屬性 (Firefox, 新版 Chrome/Edge) */
+}            .container { display: block !important; box-shadow: none; border: 1px solid #ccc; page-break-inside: avoid; margin: 0 auto 20px auto; width: 100%; max-width: 100%; }
+            .container:not(.active) { margin-top: 50px; border-top: 2px dashed #999; }
+            .result-bubble { display: none !important; }
+            .step-row { opacity: 1 !important; transform: none !important; border: 1px solid #ccc; color: #ccc; } /* 列印時顯示空白框供填寫 */
+            .step-row.active { color: black; border-color: black; }
+            
+            /* 列印時把按鈕區變成文字提示 */
+            .print-hint::after { content: " (請在此處寫下運算過程)"; color: #999; font-size: 0.8rem; display: block; margin-top: 100px; text-align: center; border-top: 1px solid #eee; }
+        }
     </style>
 </head>
 <body>
 
-    <div class="tabs">
+    <div class="top-bar">
         <button class="tab-btn active" onclick="switchTab('balance')">⚖️ 天平 (等量公理)</button>
         <button class="tab-btn" onclick="switchTab('fraction')">💣 複雜分數 (去分母)</button>
         <button class="tab-btn" onclick="switchTab('word')">📝 翻譯機 (應用題)</button>
+        <button class="tab-btn print-btn" onclick="window.print()">🖨️ 列印學習單</button>
     </div>
 
     <div id="balance" class="container active">
-        <h2>等量公理：天平實驗</h2>
-        <div style="text-align:center; font-size:2rem; font-weight:bold; margin-bottom:10px;">
-            <span id="eq-l">2x + 6</span> = <span id="eq-r">10</span>
+        <h2>等量公理：自動化天平 <span class="score-badge">Level 1</span></h2>
+        
+        <div style="text-align:center; font-size:2.5rem; font-weight:bold; margin-bottom:10px; font-family: 'Times New Roman';">
+            <span id="eq-l"></span> = <span id="eq-r"></span>
         </div>
         
         <div class="balance-wrapper">
@@ -124,25 +122,27 @@
             <div class="pivot"></div>
         </div>
         
-        <div style="text-align:center; margin-top:30px;">
+        <div class="controls">
             <button class="action-btn btn-r" onclick="wrongMove()">❌ 錯誤：只減左邊</button>
-            <button class="action-btn btn-g" onclick="correctMove()">⭕ 正確：同時減 6</button>
-            <button class="action-btn btn-y" onclick="initBalance()">🔄 重置</button>
+            <button class="action-btn btn-g" id="btn-correct-mv" onclick="correctMove()">⭕ 正確：同時減去常數</button>
         </div>
+        <div class="print-hint"></div>
+        
+        <button class="next-btn" id="next-bal" onclick="generateBalanceQuestion()">➡️ 下一題 (Next)</button>
     </div>
 
     <div id="fraction" class="container">
-        <h2>複雜分數：去分母與括號</h2>
+        <h2>複雜分數：階梯式引導</h2>
         <div class="complex-frac-box">
             <span class="frac"><span class="top">2x + 5</span><span class="btm">3</span></span>
             - <span class="frac"><span class="top">x - 2</span><span class="btm">2</span></span>
             = 2
         </div>
-        <div style="text-align:center;">
+        <div class="controls">
             <button class="action-btn btn-b" onclick="fracStep(1)">Step 1: 同乘 6</button>
-            <button class="action-btn btn-b" onclick="fracStep(2)">Step 2: 括號</button>
-            <button class="action-btn btn-r" onclick="fracStep(3)">Step 3: 拆括號</button>
-            <button class="action-btn btn-y" onclick="fracReset()">重置</button>
+            <button class="action-btn btn-b" onclick="fracStep(2)">Step 2: 括號防呆</button>
+            <button class="action-btn btn-r" onclick="fracStep(3)">Step 3: 拆括號變號</button>
+            <button class="action-btn btn-g" onclick="resetFrac()">🔄 重置</button>
         </div>
         <div id="fs1" class="step-row">6 × (左式) = 6 × 2</div>
         <div id="fs2" class="step-row">2(2x+5) - 3<span class="highlight-red">(x-2)</span> = 12</div>
@@ -150,33 +150,29 @@
     </div>
 
     <div id="word" class="container">
-        <h2>題意翻譯機</h2>
-        <div class="wp-box">
-            題目：爸爸的年齡 <span class="key-text" onclick="fillSlot(0, '=')">是</span> 
-            兒子的 <span class="key-text" onclick="fillSlot(1, '3x')">3倍</span> 
-            <span class="key-text" onclick="fillSlot(2, '-')">少</span> 5 歲。
-            <br><span style="font-size:0.9rem; color:#666;">(設兒子 x，爸爸 y)</span>
+        <h2>題意翻譯機 <span class="score-badge">題庫模式</span></h2>
+        <div class="wp-box" id="wp-text-area">
+            題目載入中...
         </div>
-        <div class="slot-row">
-            <span style="font-size:1.5rem; font-weight:bold;">y</span>
-            <div class="slot" id="s0" onclick="clearSlot(0)"></div>
-            <div class="slot" id="s1" onclick="clearSlot(1)"></div>
-            <div class="slot" id="s2" onclick="clearSlot(2)"></div>
-            <div class="slot filled" style="border:none;">5</div>
-        </div>
-        <div style="margin-top:20px; text-align:center;">
-            <button class="action-btn btn-b" onclick="manualFill('+')">+</button>
-            <button class="action-btn btn-b" onclick="manualFill('-')">-</button>
-            <button class="action-btn btn-b" onclick="manualFill('=')">=</button>
-            <button class="action-btn btn-b" onclick="manualFill('3x')">3x</button>
-            <button class="action-btn btn-g" onclick="checkWp()">✅ 檢查</button>
-        </div>
+        
+        <div class="slot-row" id="slot-container">
+            </div>
+
+        <div class="controls" id="wp-controls">
+            </div>
+        
         <p id="wp-msg" style="text-align:center; font-weight:bold; margin-top:10px; font-size:1.5rem;"></p>
+        <button class="next-btn" id="next-wp" onclick="generateWordProblem()">➡️ 下一題 (Next)</button>
     </div>
 
-    <div class="brand-watermark">STEM INSIGHT</div>
+    <div class="brand-watermark">STEM INSIGHT | 自動化教學系統</div>
 
     <script>
+        // --- 全域變數 ---
+        let balData = { xCoeff: 2, constant: 6, total: 10, answer: 2 };
+        let wpData = {}; 
+
+        // --- 頁面切換 ---
         function switchTab(id) {
             document.querySelectorAll('.container').forEach(el => el.classList.remove('active'));
             document.getElementById(id).classList.add('active');
@@ -184,73 +180,202 @@
             event.target.classList.add('active');
         }
 
-        function showBubble(text, type) {
-            const b = document.getElementById('bubble');
-            b.innerText = text;
-            b.className = "result-bubble show " + type;
-            setTimeout(() => b.classList.remove('show'), 2000);
-        }
+        // ==========================
+        // 1. 自動化天平邏輯 (Auto-Gen)
+        // ==========================
+        function generateBalanceQuestion() {
+            // 隱藏下一題按鈕 (閉鎖模式)
+            document.getElementById('next-bal').style.display = 'none';
+            document.getElementById('bubble').classList.remove('show');
+            document.getElementById('beam').className = 'beam-container';
+            
+            // 隨機生成參數：ax + b = c
+            // 為了方便視覺化，a 取 1~3，b 取 2~8 (偶數以方便排列)，x 解為正整數
+            let a = Math.floor(Math.random() * 2) + 1; // 1 or 2 (避免太多方塊擠不下)
+            if(Math.random() > 0.5) a = 2; // 增加 2 的機率
+            
+            let xVal = Math.floor(Math.random() * 3) + 2; // x 解為 2,3,4
+            let b = Math.floor(Math.random() * 3) * 2 + 2; // 2, 4, 6
+            let c = a * xVal + b;
 
-        function initBalance() {
+            balData = { xCoeff: a, constant: b, total: c, answer: xVal };
+
+            // 更新 UI
+            document.getElementById('eq-l').innerText = `${a}x + ${b}`;
+            document.getElementById('eq-r').innerText = `${c}`;
+            
+            // 繪製方塊
             const l = document.getElementById('pan-left');
             const r = document.getElementById('pan-right');
             l.innerHTML = ''; r.innerHTML = '';
-            for(let i=0; i<2; i++) l.innerHTML += `<div class="block-x">X</div>`;
-            for(let i=0; i<6; i++) l.innerHTML += `<div class="block-1">1</div>`;
-            for(let i=0; i<10; i++) r.innerHTML += `<div class="block-1">1</div>`;
-            document.getElementById('beam').className = 'beam-container';
-            document.getElementById('eq-l').innerText = "2x + 6";
-            document.getElementById('eq-r').innerText = "10";
-            document.querySelectorAll('.block-1').forEach(el => el.style.opacity = '1');
-            document.getElementById('bubble').classList.remove('show');
+
+            // 左盤：X 方塊 + 1 圓球
+            for(let i=0; i<a; i++) l.innerHTML += `<div class="block-x">X</div>`;
+            for(let i=0; i<b; i++) l.innerHTML += `<div class="block-1">1</div>`;
+            
+            // 右盤：全部 1 圓球
+            // 為了不讓畫面太擠，只畫出前 12 個，剩下的用 "+N" 表示，或者依需求調整 CSS
+            // 這裡簡單處理：全部畫出
+            for(let i=0; i<c; i++) r.innerHTML += `<div class="block-1">1</div>`;
         }
 
         function wrongMove() {
             document.getElementById('beam').className = 'beam-container tilt-cw'; 
             showBubble("⚠️ 歪了！只減一邊是不行的！", "wrong");
+            // 視覺化：讓左邊變輕 (opacity)
             document.querySelectorAll('#pan-left .block-1').forEach(el => el.style.opacity = '0.3');
         }
 
         function correctMove() {
             document.getElementById('beam').className = 'beam-container';
-            showBubble("🎉 平衡！兩邊同時減 6", "correct");
-            const l = document.querySelectorAll('#pan-left .block-1');
-            const r = document.querySelectorAll('#pan-right .block-1');
-            for(let i=0; i<6; i++) { if(l[i]) l[i].classList.add('vanish'); if(r[i]) r[i].classList.add('vanish'); }
-            setTimeout(() => { document.getElementById('eq-l').innerText = "2x"; document.getElementById('eq-r').innerText = "4"; }, 500);
-        }
-        initBalance();
+            showBubble(`🎉 平衡！兩邊同時減 ${balData.constant}`, "correct");
+            
+            // 動畫：消除常數項
+            const l1 = document.querySelectorAll('#pan-left .block-1');
+            const r1 = document.querySelectorAll('#pan-right .block-1');
+            
+            // 兩邊同時消除 b 個
+            for(let i=0; i<balData.constant; i++) {
+                if(l1[i]) l1[i].classList.add('vanish');
+                if(r1[i]) r1[i].classList.add('vanish');
+            }
 
-        function fracStep(step) {
-            document.querySelectorAll('.step-row').forEach(el => el.classList.remove('active'));
-            for(let i=1; i<=step; i++) { setTimeout(() => document.getElementById('fs'+i).classList.add('active'), (i-1)*200); }
+            // 更新方程式文字
+            setTimeout(() => { 
+                document.getElementById('eq-l').innerText = `${balData.xCoeff}x`; 
+                document.getElementById('eq-r').innerText = `${balData.total - balData.constant}`; 
+                // 解鎖下一題
+                document.getElementById('next-bal').style.display = 'block';
+            }, 800);
         }
-        function fracReset() { document.querySelectorAll('.step-row').forEach(el => el.classList.remove('active')); }
 
-        function fillSlot(idx, val) {
+        function showBubble(text, type) {
+            const b = document.getElementById('bubble');
+            b.innerText = text;
+            b.className = "result-bubble show " + type;
+            setTimeout(() => b.classList.remove('show'), 2500);
+        }
+
+        // ==========================
+        // 2. 自動化翻譯機邏輯 (Auto-Gen)
+        // ==========================
+        const wpTemplates = [
+            {
+                text: "爸爸的年齡(y) <span class='key-text' onclick='fillSlot(0, \"=\")'>是</span> 兒子的 <span class='key-text' onclick='fillSlot(1, \"3x\")'>3倍</span> <span class='key-text' onclick='fillSlot(2, \"-\")'>少</span> 5 歲。",
+                slots: ["y", null, null, null, "5"], // null 為填空
+                answer: ["=", "3x", "-"],
+                trap: ["=", "-", "3x"], // 常見錯誤順序
+                buttons: ["+", "-", "=", "3x"]
+            },
+            {
+                text: "小明的零用錢(y) <span class='key-text' onclick='fillSlot(0, \"=\")'>比</span> 哥哥的 <span class='key-text' onclick='fillSlot(1, \"2x\")'>2倍</span> <span class='key-text' onclick='fillSlot(2, \"+\")'>多</span> 10 元。",
+                slots: ["y", null, null, null, "10"],
+                answer: ["=", "2x", "+"],
+                trap: [],
+                buttons: ["+", "-", "=", "2x"]
+            },
+            {
+                text: "某數(x)的 <span class='key-text' onclick='fillSlot(0, \"4x\")'>4倍</span> <span class='key-text' onclick='fillSlot(1, \"+\")'>加</span> 7 <span class='key-text' onclick='fillSlot(2, \"=\")'>等於</span> 19。",
+                slots: [null, null, "7", null, "19"],
+                answer: ["4x", "+", "="],
+                trap: [],
+                buttons: ["+", "-", "=", "4x"]
+            }
+        ];
+
+        function generateWordProblem() {
+            document.getElementById('next-wp').style.display = 'none';
+            document.getElementById('wp-msg').innerText = "";
+            
+            // 隨機選題
+            const q = wpTemplates[Math.floor(Math.random() * wpTemplates.length)];
+            wpData = q; // 存入全域以供檢查
+
+            // Render Text
+            document.getElementById('wp-text-area').innerHTML = `題目：${q.text}`;
+
+            // Render Slots
+            const container = document.getElementById('slot-container');
+            container.innerHTML = '';
+            q.slots.forEach((item, index) => {
+                if(item) {
+                    // 固定文字
+                    container.innerHTML += `<div style="font-size:1.5rem; font-weight:bold;">${item}</div>`;
+                } else {
+                    // 空格
+                    // 找出這是第幾個空位 (logic slightly complex, simplifying assuming 3 slots always)
+                    // 這裡簡化：假設 ID 為 s0, s1, s2 依序
+                    let slotId = container.querySelectorAll('.slot').length;
+                    container.innerHTML += `<div class="slot" id="s${slotId}" onclick="clearSlot(${slotId})"></div>`;
+                }
+            });
+
+            // Render Buttons
+            const btnArea = document.getElementById('wp-controls');
+            btnArea.innerHTML = '';
+            q.buttons.forEach(val => {
+                btnArea.innerHTML += `<button class="action-btn btn-b" onclick="manualFill('${val}')">${val}</button>`;
+            });
+            btnArea.innerHTML += `<button class="action-btn btn-g" onclick="checkWp()">✅ 檢查</button>`;
+        }
+
+        function fillSlot(idx, val) { // 點擊文字填入 (Legacy support, optional)
+           manualFill(val);
+        }
+
+        function manualFill(val) {
             for(let i=0; i<3; i++) {
                 let s = document.getElementById('s'+i);
-                if(!s.classList.contains('filled')) { s.innerText = val; s.classList.add('filled'); return; }
+                if(s && !s.classList.contains('filled')) { 
+                    s.innerText = val; s.classList.add('filled'); return; 
+                }
             }
         }
-        function manualFill(val) { fillSlot(0, val); }
+
         function clearSlot(idx) {
-            let s = document.getElementById('s'+idx); s.innerText = ''; s.classList.remove('filled');
+            let s = document.getElementById('s'+idx); 
+            if(s) { s.innerText = ''; s.classList.remove('filled'); }
             document.getElementById('wp-msg').innerText = "";
         }
+
         function checkWp() {
-            const v0 = document.getElementById('s0').innerText;
-            const v1 = document.getElementById('s1').innerText;
-            const v2 = document.getElementById('s2').innerText;
+            let userAns = [];
+            for(let i=0; i<3; i++) {
+                let s = document.getElementById('s'+i);
+                if(s) userAns.push(s.innerText);
+            }
+            
             const msg = document.getElementById('wp-msg');
-            if(v0 === '=' && v1 === '3x' && v2 === '-') {
-                msg.innerText = "🎉 正確！ y = 3x - 5"; msg.style.color = "var(--success)";
-            } else if(v0 === '=' && v1 === '-' && v2 === '3x') {
-                msg.innerText = "⚠️ 陷阱！「少 5」是減在後面！"; msg.style.color = "#e67e22";
+            
+            // 比對答案
+            if(JSON.stringify(userAns) === JSON.stringify(wpData.answer)) {
+                msg.innerText = "🎉 正確！邏輯通順！"; 
+                msg.style.color = "var(--success)";
+                document.getElementById('next-wp').style.display = 'block'; // 解鎖
+            } else if (JSON.stringify(userAns) === JSON.stringify(wpData.trap)) {
+                msg.innerText = "⚠️ 陷阱！中文語法要注意前後順序！"; 
+                msg.style.color = "#e67e22";
             } else {
-                msg.innerText = "❌ 順序不對，再試試！"; msg.style.color = "var(--danger)";
+                msg.innerText = "❌ 順序不對，再試試！"; 
+                msg.style.color = "var(--danger)";
             }
         }
+
+        // --- 分數區 (維持手動展示，但可重置) ---
+        function fracStep(step) {
+            document.querySelectorAll('.step-row').forEach(el => el.classList.remove('active'));
+            for(let i=1; i<=step; i++) { 
+                setTimeout(() => document.getElementById('fs'+i).classList.add('active'), (i-1)*200); 
+            }
+        }
+        function resetFrac() {
+            document.querySelectorAll('.step-row').forEach(el => el.classList.remove('active'));
+        }
+
+        // 初始化
+        generateBalanceQuestion();
+        generateWordProblem();
+
     </script>
 </body>
 </html>
