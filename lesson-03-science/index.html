@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>沛妤的理化特訓中心 | 完全體</title>
+    <title>沛妤的理化特訓中心 | 修正版</title>
     <style>
         :root { 
             --primary: #2c3e50; --accent: #d35400; --bg: #f5f6fa;
@@ -12,7 +12,10 @@
         body { font-family: 'Microsoft JhengHei', sans-serif; background: var(--bg); margin: 0; padding: 0; height: 100vh; overflow: hidden; }
 
         /* ================== 1. 首頁 (大廳) ================== */
-        #home-screen { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(135deg, #1a2a6c, #b21f1f); color: white; position: absolute; z-index: 200; transition: 0.5s; }
+        #home-screen { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(135deg, #1a2a6c, #b21f1f); color: white; position: absolute; top:0; left:0; z-index: 500; transition: 0.5s; }
+        /* 增加一個隱藏用的 class */
+        #home-screen.hidden { display: none; opacity: 0; pointer-events: none; }
+
         .hero-title { font-size: 3.5rem; margin-bottom: 10px; text-shadow: 0 4px 10px rgba(0,0,0,0.5); font-weight: bold; }
         .hero-subtitle { font-size: 1.2rem; margin-bottom: 50px; opacity: 0.9; letter-spacing: 2px; }
         
@@ -39,13 +42,11 @@
         .action-btn { background: var(--accent); color: white; border: none; padding: 10px 25px; border-radius: 50px; cursor: pointer; font-size: 1rem; font-weight: bold; box-shadow: 0 5px 15px rgba(211, 84, 0, 0.3); transition:0.2s; }
         .action-btn:hover { transform: translateY(-2px); }
 
-        /* 原子與熱學實驗樣式 (從上一版移植並優化) */
+        /* 原子與熱學實驗樣式 */
         .lab-visual-area { display: flex; gap: 40px; justify-content: center; margin-top: 20px; flex-wrap: wrap; }
         .beaker { width: 140px; height: 180px; border: 4px solid #333; border-top: none; position: relative; background: rgba(255,255,255,0.8); border-radius: 0 0 15px 15px; }
         .liquid { width: 100%; position: absolute; bottom: 0; background: #3498db; transition: 0.5s; }
         .ice { width: 100%; height: 60px; background: #aed6f1; position: absolute; bottom: 0; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #154360; }
-        .thermometer { width: 10px; height: 200px; background: #eee; border: 1px solid #999; border-radius: 5px; position: relative; }
-        .mercury { width: 100%; background: #e74c3c; position: absolute; bottom: 0; transition: height 0.1s; }
         
         .atom-stage { width: 280px; height: 280px; position: relative; border: 1px solid #eee; border-radius: 50%; margin: 0 auto; }
         .orbit { border: 1px dashed #ccc; border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
@@ -55,7 +56,7 @@
         .back-btn { position: absolute; top: 20px; left: 20px; background: rgba(0,0,0,0.5); color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; z-index: 200; }
 
         /* ================== 3. 實戰模式 (左右對照) ================== */
-        #mastery-zone { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 150; display: none; flex-direction: row; }
+        #mastery-zone { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 100; display: none; flex-direction: row; }
         #mastery-zone.active { display: flex; }
         
         /* 左側考卷 */
@@ -75,9 +76,15 @@
         .helper-card { width: 100%; height: 100%; background: white; border-radius: 15px; padding: 20px; display: none; overflow-y: auto; box-shadow: 0 5px 20px rgba(0,0,0,0.1); }
         .helper-card.active { display: block; animation: fadeIn 0.3s; }
 
+        /* 其他實驗 CSS */
+        .thermos-vis { width: 140px; height: 280px; border: 4px solid #555; margin: 0 auto; position: relative; background: #eee; border-radius: 15px; }
+        .t-layer { position: absolute; width: 100%; height: 100%; border-radius: 11px; transition: 0.3s; opacity: 0; }
+        .chart-vis { width: 300px; height: 200px; border-left: 2px solid #333; border-bottom: 2px solid #333; position: relative; margin: 20px auto; }
+        .chart-line { position: absolute; height: 4px; background: #95a5a6; transform-origin: left bottom; cursor: pointer; transition: 0.2s; }
+        .chart-line:hover { height: 8px; background: #e67e22; }
+
         /* 通用動畫 */
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
 
     </style>
 </head>
@@ -309,20 +316,25 @@
 </div>
 
 <script>
-    // --- 頁面切換 ---
+    // --- 1. 導航邏輯 ---
     function goHome() {
+        document.getElementById('home-screen').classList.remove('hidden');
         document.getElementById('lecture-zone').classList.remove('active');
         document.getElementById('mastery-zone').classList.remove('active');
     }
+
     function goToLecture() {
+        document.getElementById('home-screen').classList.add('hidden'); // 關鍵修正
         document.getElementById('lecture-zone').classList.add('active');
         showSlide(1);
     }
+
     function goToMastery() {
+        document.getElementById('home-screen').classList.add('hidden'); // 關鍵修正
         document.getElementById('mastery-zone').classList.add('active');
     }
 
-    // --- 上課模式邏輯 ---
+    // --- 2. 上課模式邏輯 ---
     function showSlide(n) {
         document.querySelectorAll('.slide').forEach(s => s.classList.remove('active'));
         document.getElementById('slide-'+n).classList.add('active');
@@ -330,7 +342,7 @@
         document.querySelectorAll('.lec-step')[n-1].classList.add('active');
     }
 
-    // 5-5 實驗模擬
+    // 5-5 實驗模擬 (Lecture Mode)
     let heatTimer;
     function heatStart() {
         let temp = -10; let time = 0;
@@ -339,9 +351,10 @@
         const water = document.getElementById('water-visual');
         const txt = document.getElementById('state-text');
         
+        if(heatTimer) clearInterval(heatTimer);
+        
         heatTimer = setInterval(() => {
             time += 1;
-            // 簡化模擬
             if(time < 20) { temp += 1; txt.innerText = "固體升溫 (" + temp + "°C)"; } 
             else if(time < 50) { 
                 temp = 0; txt.innerText = "平臺：熔化中 (溫度卡住！)";
@@ -357,14 +370,14 @@
             
             // 繪圖點移動
             dot.style.left = (time * 3) + 'px';
-            dot.style.bottom = (20 + (temp+10)*1.5) + 'px'; // 簡略映射
+            dot.style.bottom = (20 + (temp+10)*1.5) + 'px'; 
             
             if(time > 100) clearInterval(heatTimer);
         }, 50);
     }
     function heatStop() { clearInterval(heatTimer); }
 
-    // 6-2 實驗模擬
+    // 6-2 實驗模擬 (Lecture Mode)
     function lecModAtom(type) {
         const msg = document.getElementById('lec-msg');
         if(type==='p') {
@@ -373,15 +386,13 @@
             document.getElementById('lec-atom-name').innerText = "N 氮";
         } else if (type==='n') {
             msg.innerText = "⭕ 很好：動中子只是變胖 (同位素)，還是碳！";
-            document.getElementById('lec-nucleus').classList.add('pulse'); // 假設有 CSS 動畫
         } else {
             msg.innerText = "⭕ 很好：動電子只是帶電 (離子)，還是碳！";
-            // 簡單渲染電子減少
             document.getElementById('lec-elec-con').innerHTML = ''; 
         }
     }
     
-    // 初始化電子
+    // 初始化電子 (Lecture Mode)
     function initElec() {
         const c = document.getElementById('lec-elec-con');
         if(!c) return;
@@ -396,7 +407,7 @@
     }
     initElec();
 
-    // --- 實戰模式邏輯 ---
+    // --- 3. 實戰模式邏輯 (Mastery Mode) ---
     function openHelper(id) {
         document.querySelectorAll('.q-box').forEach(b => b.classList.remove('active'));
         event.currentTarget.classList.add('active');
