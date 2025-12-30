@@ -1,687 +1,374 @@
 <!DOCTYPE html>
-
 <html lang="zh-TW">
-
 <head>
-
     <meta charset="UTF-8">
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>沛妤的 A 卷實戰特訓班</title>
-
+    <title>沛妤的理化特訓班 | 5-4 熱傳播 & 6-2 原子結構</title>
     <style>
-
         :root { 
-
-            --paper-bg: #fff; 
-
-            --paper-line: #eee;
-
-            --highlight: #f1c40f;
-
-            --primary: #2c3e50;
-
-            --accent: #d35400;
-
+            --primary: #2c3e50; 
+            --accent: #d35400; 
+            --proton: #e74c3c; 
+            --neutron: #7f8c8d; 
+            --electron: #3498db; 
+            --bg: #fdfefe;
+            --heat-wave: #e67e22;
         }
-
-        body { font-family: 'PMingLiU', 'MingLiU', serif; /* 仿照考卷字體 */ background: #555; margin: 0; padding: 0; height: 100vh; overflow: hidden; display: flex; }
-
+        body { font-family: 'Microsoft JhengHei', sans-serif; background: var(--bg); margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
         
+        /* 導航 */
+        .nav-bar { display: flex; gap: 10px; margin-bottom: 20px; background: white; padding: 10px; border-radius: 50px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); flex-wrap: wrap; justify-content: center; }
+        .nav-step { padding: 10px 20px; border-radius: 40px; cursor: pointer; font-weight: bold; color: #7f8c8d; transition: 0.3s; display: flex; align-items: center; gap: 5px; font-size: 0.9rem; border: 1px solid transparent; }
+        .nav-step.active { background: var(--primary); color: white; transform: scale(1.05); border-color: var(--primary); }
 
-        /* === 左側：A卷模擬區 === */
+        .stage { width: 100%; max-width: 950px; background: white; border-radius: 20px; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); min-height: 600px; position: relative; display: none; }
+        .stage.active { display: block; animation: fadeIn 0.5s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        .exam-panel { width: 45%; background: var(--paper-bg); padding: 40px; overflow-y: auto; box-shadow: 5px 0 15px rgba(0,0,0,0.3); position: relative; }
+        .guide-box { background: #fff8e1; border-left: 5px solid #ffc107; padding: 15px; margin-bottom: 20px; font-size: 1.1rem; border-radius: 5px; display: flex; align-items: center; justify-content: space-between; }
+        .guide-action { background: var(--accent); color: white; border: none; padding: 10px 25px; border-radius: 5px; cursor: pointer; font-size: 1rem; font-weight:bold; transition:0.2s; }
+        .guide-action:hover { transform: translateY(-2px); }
 
-        .exam-header { border-bottom: 2px double #000; padding-bottom: 10px; margin-bottom: 20px; text-align: center; font-weight: bold; }
-
-        .exam-title { font-size: 1.5rem; letter-spacing: 3px; }
-
-        .exam-subtitle { font-size: 1rem; color: #333; margin-top: 5px; }
-
+        /* --- 原子視覺 (維持原樣) --- */
+        .atom-layout { display: flex; gap: 30px; flex-wrap: wrap; justify-content: center; }
+        .atom-visual { width: 320px; height: 320px; position: relative; border: 1px solid #eee; border-radius: 20px; background: radial-gradient(circle at center, #fff, #f4f6f7); }
+        .orbit { border: 1px dashed #bdc3c7; border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+        .nucleus { width: 80px; height: 80px; background: #2c3e50; border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; display: flex; flex-direction: column; justify-content: center; align-items: center; font-weight: bold; z-index: 10; font-size: 0.9rem; transition: transform 0.2s; }
+        .nucleus.pulse { animation: pulse-nuc 0.3s; }
+        @keyframes pulse-nuc { 50% { transform: translate(-50%, -50%) scale(1.2); } }
+        .electron { width: 14px; height: 14px; background: var(--electron); border-radius: 50%; position: absolute; }
         
+        .atom-controls { flex: 1; min-width: 300px; display: flex; flex-direction: column; gap: 15px; }
+        .ctrl-row { display: flex; align-items: center; justify-content: space-between; background: white; padding: 10px 15px; border-radius: 8px; border: 1px solid #eee; }
+        .btn-circle { width: 32px; height: 32px; border-radius: 50%; border: none; font-size: 1.2rem; cursor: pointer; }
 
-        .question-block { margin-bottom: 30px; padding: 15px; border-radius: 5px; transition: 0.3s; border-left: 4px solid transparent; }
-
-        .question-block.active { background: #fffbe6; border-left-color: var(--highlight); }
-
-        .q-text { font-size: 1.1rem; line-height: 1.6; font-weight: bold; color: #000; }
-
-        .q-options { list-style: none; padding: 0; margin-top: 10px; }
-
-        .q-opt { padding: 8px 15px; cursor: pointer; border: 1px solid transparent; border-radius: 4px; display: flex; align-items: center; margin-bottom: 5px; font-family: sans-serif; font-size: 1rem; }
-
-        .q-opt:hover { background: #f0f0f0; }
-
-        .q-opt.selected { background: #dcdcdc; font-weight: bold; }
-
-        .q-opt.correct { background: #d4edda; color: #155724; border-color: #c3e6cb; }
-
-        .q-opt.wrong { background: #f8d7da; color: #721c24; border-color: #f5c6cb; }
-
-
-
-        .btn-summon { background: var(--accent); color: white; border: none; padding: 5px 12px; border-radius: 20px; font-family: sans-serif; cursor: pointer; font-size: 0.9rem; float: right; margin-top: -5px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); animation: pulse 2s infinite; }
-
-        .btn-summon:hover { transform: scale(1.1); }
-
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
-
-
-
-        /* === 右側：實驗救援區 === */
-
-        .lab-panel { width: 55%; background: #ecf0f1; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Microsoft JhengHei', sans-serif; }
-
-        .lab-scene { width: 90%; height: 90%; background: white; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); padding: 20px; display: none; position: relative; overflow-y: auto; }
-
-        .lab-scene.active { display: block; animation: slideIn 0.5s; }
-
-        @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
-
+        /* --- STAGE 3: 熱傳播防禦戰 (NEW) --- */
+        .thermos-container { display: flex; gap: 40px; justify-content: center; align-items: center; padding: 20px; }
         
-
-        .lab-title { font-size: 1.5rem; color: var(--primary); font-weight: bold; margin-bottom: 10px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
-
-        .lab-instruction { background: #e8f8f5; color: #0e6251; padding: 10px; border-radius: 5px; margin-bottom: 20px; font-size: 1rem; }
-
-
-
-        /* 實驗元件：保溫瓶 */
-
-        .thermos-box { width: 180px; height: 350px; border: 4px solid #555; border-radius: 20px; margin: 0 auto; position: relative; background: #eee; }
-
-        .t-inner { width: 140px; height: 300px; background: #e74c3c; border-radius: 15px; position: absolute; top: 35px; left: 16px; display: flex; justify-content: center; align-items: center; color: white; font-weight: bold; font-size: 1.5rem; z-index: 5; }
-
-        .t-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; transition: 0.5s; opacity: 0; }
-
-        .layer-silver { border: 3px solid silver; border-radius: 20px; box-shadow: inset 0 0 15px white; z-index: 6; }
-
-        .layer-vacuum { border: 4px dashed #7f8c8d; border-radius: 25px; top:-5px; left:-5px; width:182px; height:352px; z-index: 7; }
-
-        .t-cap { width: 100px; height: 30px; background: #8d6e63; position: absolute; top: -10px; left: 40px; border-radius: 5px; z-index: 8; opacity: 0; transition: 0.5s; }
-
+        /* 保溫瓶視覺 */
+        .thermos-bottle { width: 200px; height: 400px; border: 4px solid #555; border-radius: 20px; position: relative; background: #eee; overflow: hidden; }
+        .thermos-inner { width: 160px; height: 340px; background: #e74c3c; border-radius: 15px; position: absolute; top: 40px; left: 16px; transition: 0.5s; z-index: 5; display: flex; justify-content: center; align-items: center; color: white; font-weight: bold; }
         
+        /* 防禦層 */
+        .layer-vacuum { position: absolute; top: 35px; left: 10px; width: 172px; height: 350px; border: 3px dashed #999; border-radius: 18px; pointer-events: none; opacity: 0; transition: 0.5s; }
+        .layer-silver { position: absolute; top: 40px; left: 16px; width: 160px; height: 340px; border-radius: 15px; box-shadow: inset 0 0 20px silver; border: 2px solid silver; opacity: 0; transition: 0.5s; pointer-events: none; z-index: 6; }
+        .layer-stopper { position: absolute; top: 0; left: 50px; width: 100px; height: 40px; background: #8d6e63; border-radius: 5px 5px 0 0; opacity: 0; transition: 0.5s; z-index: 10; }
 
-        .heat-arrow { position: absolute; font-size: 1.5rem; font-weight: bold; transition: 0.5s; }
+        /* 熱量箭頭 */
+        .heat-arrow { position: absolute; font-size: 2rem; color: var(--heat-wave); transition: 1s; font-weight: bold; }
+        .arrow-conduction { top: 50%; right: -50px; animation: moveLeft 1s infinite; }
+        .arrow-convection { top: -40px; left: 50%; transform: translateX(-50%) rotate(90deg); animation: moveUp 1s infinite; }
+        .arrow-radiation { top: 50%; left: -50px; animation: moveRight 1s infinite; color: purple; }
+        
+        @keyframes moveLeft { 0% { transform: translateX(0); opacity:1; } 100% { transform: translateX(-30px); opacity:0; } }
+        @keyframes moveRight { 0% { transform: translateX(0); opacity:1; } 100% { transform: translateX(30px); opacity:0; } }
+        @keyframes moveUp { 0% { transform: translateX(-50%) translateY(0); opacity:1; } 100% { transform: translateX(-50%) translateY(-30px); opacity:0; } }
 
-        .arr-rad { color: purple; left: -80px; top: 50%; }
+        .defense-panel { flex: 1; display: flex; flex-direction: column; gap: 15px; }
+        .defense-card { background: #f9f9f9; padding: 15px; border-radius: 10px; border-left: 5px solid #ccc; cursor: pointer; transition: 0.2s; position: relative; }
+        .defense-card:hover { transform: translateX(5px); background: #f0f0f0; }
+        .defense-card.active { border-color: var(--accent); background: #fff3e0; }
+        .defense-card h4 { margin: 0 0 5px 0; }
+        .defense-card p { margin: 0; font-size: 0.9rem; color: #666; }
 
-        .arr-cond { color: orange; right: -120px; top: 50%; }
+        /* 陷阱題區塊 */
+        .trap-cups { display: flex; justify-content: center; gap: 40px; margin-top: 30px; }
+        .cup { width: 100px; height: 120px; border-radius: 0 0 10px 10px; position: relative; display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: pointer; border: 3px solid #333; border-top:none; transition: 0.3s; }
+        .cup:hover { transform: scale(1.05); }
+        .cup-black { background: #2c3e50; color: white; }
+        .cup-white { background: #fff; color: #333; border-color: #ccc; }
+        .heat-waves { position: absolute; top: -20px; width: 100%; display: flex; justify-content: center; gap: 5px; opacity: 0; }
+        .wave { width: 5px; height: 20px; background: orange; animation: wavy 1s infinite; }
+        @keyframes wavy { 0% { height:10px; opacity:0.5; } 50% { height:20px; opacity:1; } 100% { height:10px; opacity:0.5; } }
 
-        .arr-conv { color: red; top: -50px; left: 50%; transform: translateX(-50%) rotate(-90deg); }
-
-
-
-        /* 實驗元件：原子 */
-
-        .atom-stage { position: relative; width: 280px; height: 280px; margin: 0 auto; }
-
-        .orbit { border: 1px dashed #bbb; border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
-
-        .nucleus { width: 60px; height: 60px; background: #2c3e50; border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: 0.2s; z-index: 10; }
-
-        .electron { width: 12px; height: 12px; background: #3498db; border-radius: 50%; position: absolute; }
-
-        .ctrl-btn { width: 30px; height: 30px; border-radius: 50%; border: 1px solid #ccc; cursor: pointer; background: white; font-weight: bold; }
-
-        .ctrl-btn:hover { background: #eee; }
-
-
-
-        /* 初始畫面 */
-
-        #intro-screen { text-align: center; margin-top: 100px; color: #7f8c8d; }
+        /* 彈窗 */
+        .popup-msg { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); z-index: 100; text-align: center; display: none; max-width: 400px; border-top: 8px solid var(--accent); }
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 99; display: none; }
 
     </style>
-
 </head>
-
 <body>
 
-
-
-<div class="exam-panel">
-
-    <div class="exam-header">
-
-        <div class="exam-title">翰林版 自然科(三) A卷</div>
-
-        <div class="exam-subtitle">範圍：5-4 熱傳播 ~ 6-4 元素週期表</div>
-
-        <div style="margin-top:10px; font-family:sans-serif; font-size:0.9rem; color:#d35400;">⚠️ 沛妤的實戰特訓區</div>
-
-    </div>
-
-
-
-    <div class="question-block" id="q1" onclick="selectQ(1)">
-
-        <button class="btn-summon" onclick="openLab('heat-trans')">🧪 召喚實驗</button>
-
-        <div class="q-text">1. (5-4) 寒流來襲時，手摸鐵窗感覺比摸木門還冷，這是因為鐵窗具有哪種特性？</div>
-
-        <ul class="q-options">
-
-            <li class="q-opt" onclick="checkAns(this, false)">A. 鐵窗的溫度比木門低</li>
-
-            <li class="q-opt" onclick="checkAns(this, true)">B. 鐵窗傳導熱量的速率較快</li>
-
-            <li class="q-opt" onclick="checkAns(this, false)">C. 鐵窗容易產生熱對流</li>
-
-            <li class="q-opt" onclick="checkAns(this, false)">D. 鐵窗的比熱較大</li>
-
-        </ul>
-
-    </div>
-
-
-
-    <div class="question-block" id="q2" onclick="selectQ(2)">
-
-        <button class="btn-summon" onclick="openLab('thermos')">🧪 召喚實驗</button>
-
-        <div class="q-text">2. (5-4) 有關保溫瓶的構造設計，下列敘述何者錯誤？</div>
-
-        <ul class="q-options">
-
-            <li class="q-opt" onclick="checkAns(this, false)">A. 真空夾層可防止熱傳導與熱對流</li>
-
-            <li class="q-opt" onclick="checkAns(this, true)">B. 鍍銀內壁主要是為了防止熱傳導</li>
-
-            <li class="q-opt" onclick="checkAns(this, false)">C. 軟木塞或塑膠蓋是不良導體，可減少熱流失</li>
-
-            <li class="q-opt" onclick="checkAns(this, false)">D. 光滑鏡面可將熱輻射反射回瓶內</li>
-
-        </ul>
-
-    </div>
-
-
-
-    <div class="question-block" id="q3" onclick="selectQ(3)">
-
-        <button class="btn-summon" onclick="openLab('atom')">🧪 召喚實驗</button>
-
-        <div class="q-text">3. (6-2) 碳-12 與 碳-14 互為「同位素」。關於這兩個原子的敘述，下列何者正確？</div>
-
-        <ul class="q-options">
-
-            <li class="q-opt" onclick="checkAns(this, false)">A. 它們的質子數不同</li>
-
-            <li class="q-opt" onclick="checkAns(this, false)">B. 它們是不同的元素</li>
-
-            <li class="q-opt" onclick="checkAns(this, false)">C. 它們的電子數不同</li>
-
-            <li class="q-opt" onclick="checkAns(this, true)">D. 它們的中子數不同，質量數也不同</li>
-
-        </ul>
-
-    </div>
-
-
-
-    <div class="question-block" id="q4" onclick="selectQ(4)">
-
-        <button class="btn-summon" onclick="openLab('atom')">🧪 召喚實驗</button>
-
-        <div class="q-text">4. (6-2) 已知鈉原子序為 11。若鈉原子失去 1 個電子變成鈉離子 (Na⁺)，則下列變化何者正確？</div>
-
-        <ul class="q-options">
-
-            <li class="q-opt" onclick="checkAns(this, false)">A. 質子數變為 12</li>
-
-            <li class="q-opt" onclick="checkAns(this, true)">B. 仍屬於鈉元素，質子數維持 11</li>
-
-            <li class="q-opt" onclick="checkAns(this, false)">C. 變成鎂原子 (Mg)</li>
-
-            <li class="q-opt" onclick="checkAns(this, false)">D. 原子核帶負電</li>
-
-        </ul>
-
-    </div>
-
+<div class="nav-bar">
+    <div class="nav-step active" id="nav-1" onclick="switchStage(1)">1. 原子結構 (觀念)</div>
+    <div class="nav-step" id="nav-2" onclick="switchStage(2)">2. 同位素與離子 (陷阱)</div>
+    <div class="nav-step" id="nav-3" onclick="switchStage(3)">3. 熱傳播防禦戰 (5-4)</div>
 </div>
 
-
-
-<div class="lab-panel">
-
-    <div id="intro-screen">
-
-        <h2>⚗️ 實驗救援區</h2>
-
-        <p>點擊左側題目的「🧪 召喚實驗」<br>這裡會出現對應的工具幫妳解題！</p>
-
-    </div>
-
-
-
-    <div id="lab-heat-trans" class="lab-scene">
-
-        <div class="lab-title">🔥 熱傳導實驗：金屬 vs 木頭</div>
-
-        <div class="lab-instruction">點擊不同材質，看看熱量跑多快！</div>
-
-        <div style="display:flex; justify-content:space-around; margin-top:50px;">
-
-            <div style="text-align:center; cursor:pointer;" onclick="simCond('metal')">
-
-                <div style="width:100px; height:100px; background:#bdc3c7; border-radius:10px; margin:0 auto; display:flex; align-items:center; justify-content:center; font-weight:bold; color:#555;">金屬 (鐵窗)</div>
-
-                <div id="arrow-metal" style="font-size:2rem; color:red; opacity:0; transition:0.2s;">🔥🔥🔥</div>
-
-                <p>導熱快 (熱被吸走)</p>
-
-            </div>
-
-            <div style="text-align:center; cursor:pointer;" onclick="simCond('wood')">
-
-                <div style="width:100px; height:100px; background:#a1887f; border-radius:10px; margin:0 auto; display:flex; align-items:center; justify-content:center; font-weight:bold; color:white;">木頭 (木門)</div>
-
-                <div id="arrow-wood" style="font-size:2rem; color:orange; opacity:0; transition:1s;">🔥</div>
-
-                <p>導熱慢 (保溫)</p>
-
-            </div>
-
+<div id="stage-1" class="stage active">
+    <div class="guide-box">
+        <div>
+            <strong style="color:var(--proton)">🔴 質子</strong> = 身分證 (決定元素)<br>
+            <strong style="color:var(--neutron)">⚪ 中子</strong> = 體重 (決定同位素)<br>
+            <strong style="color:var(--electron)">🔵 電子</strong> = 衣服 (決定帶電)
         </div>
-
-        <div id="cond-result" style="text-align:center; margin-top:20px; font-weight:bold; color:#d35400;"></div>
-
     </div>
-
-
-
-    <div id="lab-thermos" class="lab-scene">
-
-        <div class="lab-title">🛡️ 保溫瓶防禦戰</div>
-
-        <div class="lab-instruction">請點擊下方按鈕，看看這些構造擋住了誰？</div>
-
-        
-
-        <div style="display:flex; align-items:center; justify-content:center; gap:30px;">
-
-            <div class="thermos-box">
-
-                <div class="t-cap" id="t-cap"></div>
-
-                <div class="t-layer layer-vacuum" id="t-vac"></div>
-
-                <div class="t-layer layer-silver" id="t-sil"></div>
-
-                <div class="t-inner">90°C</div>
-
-                
-
-                <div class="heat-arrow arr-rad" id="arr-rad">⟿ 輻射</div>
-
-                <div class="heat-arrow arr-cond" id="arr-cond">⟳ 傳導</div>
-
-                <div class="heat-arrow arr-conv" id="arr-conv">⟰ 對流</div>
-
-            </div>
-
-            
-
-            <div style="display:flex; flex-direction:column; gap:10px;">
-
-                <button class="btn-summon" style="float:none; width:150px;" onclick="toggleThermos('vac')">真空夾層</button>
-
-                <button class="btn-summon" style="float:none; width:150px; background:purple;" onclick="toggleThermos('sil')">鍍銀內壁</button>
-
-                <button class="btn-summon" style="float:none; width:150px; background:#8d6e63;" onclick="toggleThermos('cap')">軟木塞</button>
-
-            </div>
-
-        </div>
-
-        <div id="thermos-msg" style="text-align:center; margin-top:20px; font-weight:bold; color:#2c3e50; min-height:40px;"></div>
-
-    </div>
-
-
-
-    <div id="lab-atom" class="lab-scene">
-
-        <div class="lab-title">⚛️ 原子身分證</div>
-
-        <div class="lab-instruction">試著調整粒子，看看誰是老大？</div>
-
-        
-
-        <div class="atom-stage">
-
+    <div class="atom-layout">
+        <div class="atom-visual">
             <div class="orbit" style="width:120px; height:120px;"></div>
-
-            <div class="orbit" style="width:220px; height:220px;"></div>
-
-            <div class="nucleus" id="atom-nuc">
-
-                <div style="font-size:0.8rem;">P:<span id="val-p">6</span></div>
-
-                <div style="font-size:0.8rem;">N:<span id="val-n">6</span></div>
-
+            <div class="orbit" style="width:240px; height:240px;"></div>
+            <div class="nucleus" id="nucleus-1">
+                <div>P:<span id="p-val-disp">6</span></div>
+                <div>N:<span id="n-val-disp">6</span></div>
             </div>
-
-            <div id="elec-con"></div>
-
+            <div id="elec-container-1"></div>
         </div>
-
-
-
-        <div style="display:flex; justify-content:center; gap:20px; margin-top:20px;">
-
-            <div style="text-align:center;">
-
-                <label style="color:#e74c3c; font-weight:bold;">質子 (身分)</label><br>
-
-                <button class="ctrl-btn" onclick="modAtom('p',-1)">-</button> <span id="txt-p">6</span> <button class="ctrl-btn" onclick="modAtom('p',1)">+</button>
-
+        <div class="atom-controls">
+            <div style="background:#f8f9f9; padding:20px; border-radius:10px; border-left:5px solid var(--primary);">
+                <div style="font-size:2rem; font-weight:bold; color:var(--primary);" id="element-symbol">C</div>
+                <div>原子序：<span id="atomic-num-disp" style="color:var(--proton); font-weight:bold;">6</span></div>
+                <div>質量數：<span id="mass-num-disp" style="font-weight:bold;">12</span></div>
             </div>
-
-            <div style="text-align:center;">
-
-                <label style="color:#7f8c8d; font-weight:bold;">中子 (胖瘦)</label><br>
-
-                <button class="ctrl-btn" onclick="modAtom('n',-1)">-</button> <span id="txt-n">6</span> <button class="ctrl-btn" onclick="modAtom('n',1)">+</button>
-
+            <div class="ctrl-row" style="border-left: 5px solid var(--proton);">
+                <label>🔴 質子 (身分)</label>
+                <div>
+                    <button class="btn-circle" style="background:#fdedec; color:var(--proton);" onclick="updateAtom('p', -1)">-</button>
+                    <span id="ctrl-p" style="margin:0 10px; font-weight:bold;">6</span>
+                    <button class="btn-circle" style="background:#fdedec; color:var(--proton);" onclick="updateAtom('p', 1)">+</button>
+                </div>
             </div>
-
-            <div style="text-align:center;">
-
-                <label style="color:#3498db; font-weight:bold;">電子 (帶電)</label><br>
-
-                <button class="ctrl-btn" onclick="modAtom('e',-1)">-</button> <span id="txt-e">6</span> <button class="ctrl-btn" onclick="modAtom('e',1)">+</button>
-
+            <div class="ctrl-row" style="border-left: 5px solid var(--neutron);">
+                <label>⚪ 中子 (體重)</label>
+                <div>
+                    <button class="btn-circle" style="background:#f4f6f6; color:var(--neutron);" onclick="updateAtom('n', -1)">-</button>
+                    <span id="ctrl-n" style="margin:0 10px; font-weight:bold;">6</span>
+                    <button class="btn-circle" style="background:#f4f6f6; color:var(--neutron);" onclick="updateAtom('n', 1)">+</button>
+                </div>
             </div>
-
+            <div class="ctrl-row" style="border-left: 5px solid var(--electron);">
+                <label>🔵 電子 (衣服)</label>
+                <div>
+                    <button class="btn-circle" style="background:#ebf5fb; color:var(--electron);" onclick="updateAtom('e', -1)">-</button>
+                    <span id="ctrl-e" style="margin:0 10px; font-weight:bold;">6</span>
+                    <button class="btn-circle" style="background:#ebf5fb; color:var(--electron);" onclick="updateAtom('e', 1)">+</button>
+                </div>
+            </div>
         </div>
-
-        
-
-        <div style="margin-top:20px; padding:10px; background:#f9f9f9; border-radius:10px; text-align:center;">
-
-            <div id="atom-name" style="font-size:1.5rem; font-weight:bold; color:#2c3e50;">C 碳</div>
-
-            <div id="atom-iso" style="color:#666;">質量數：12 (標準)</div>
-
-            <div id="atom-ion" style="color:#666;">電中性</div>
-
-        </div>
-
-        <div id="atom-warning" style="color:red; font-weight:bold; text-align:center; min-height:20px;"></div>
-
     </div>
-
+    <div style="text-align:center; margin-top:20px;">
+        <button class="guide-action" onclick="switchStage(2)">👉 去挑戰同位素</button>
+    </div>
 </div>
 
+<div id="stage-2" class="stage">
+    <div class="guide-box">
+        <span class="guide-text">🎯 任務：請做出 <strong>碳-14</strong> (胖兄弟) 與 <strong>鈉離子</strong> (帶正電)。</span>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:20px;">
+        <div style="background:#fff; border:2px solid #95a5a6; border-radius:10px; padding:20px; text-align:center;">
+            <h3>Q1. 製作「碳-14」同位素</h3>
+            <p>目前是 碳-12。要變成 碳-14，該增加什麼？</p>
+            <div style="display:flex; justify-content:center; gap:20px;">
+                <button class="guide-action" style="background:var(--proton);" onclick="showTrap('p_iso')">加質子 (P)</button>
+                <button class="guide-action" style="background:var(--neutron);" onclick="showTrap('n_iso')">加中子 (N)</button>
+            </div>
+        </div>
+        <div style="background:#fff; border:2px solid #3498db; border-radius:10px; padding:20px; text-align:center;">
+            <h3>Q2. 製作「鈉離子 (Na⁺)」</h3>
+            <p>要讓 Na 帶正電，該怎麼做？</p>
+            <div style="display:flex; justify-content:center; gap:20px;">
+                <button class="guide-action" style="background:var(--proton);" onclick="showTrap('p_ion')">加質子 (變成 + )</button>
+                <button class="guide-action" style="background:var(--electron);" onclick="showTrap('e_ion')">丟電子 (丟掉 - )</button>
+            </div>
+        </div>
+    </div>
+    <div style="text-align:center; margin-top:20px;">
+        <button class="guide-action" style="background:#27ae60;" onclick="switchStage(3)">👉 進入熱傳播防禦戰</button>
+    </div>
+</div>
 
+<div id="stage-3" class="stage">
+    <div class="guide-box">
+        <span class="guide-text">🛡️ 任務：這是一瓶熱水。請使用道具，擋住熱的逃跑！</span>
+    </div>
+
+    <div class="thermos-container">
+        <div class="thermos-bottle">
+            <div class="layer-stopper" id="vis-stopper"></div> <div class="layer-vacuum" id="vis-vacuum"></div> <div class="layer-silver" id="vis-silver"></div> <div class="thermos-inner">
+                <div style="text-align:center;">
+                    <div style="font-size:2rem;">🔥</div>
+                    <div id="water-temp">90°C</div>
+                </div>
+            </div>
+
+            <div id="arrow-cond" class="heat-arrow arrow-conduction">⟳ 傳導</div>
+            <div id="arrow-conv" class="heat-arrow arrow-convection">⟰ 對流</div>
+            <div id="arrow-rad" class="heat-arrow arrow-radiation">⟿ 輻射</div>
+        </div>
+
+        <div class="defense-panel">
+            <div class="defense-card" onclick="deployDefense('vacuum')">
+                <h4>🛡️ 真空夾層 (Vacuum)</h4>
+                <p>抽光空氣，沒有介質。</p>
+                <small style="color:var(--accent);">防禦：傳導、對流</small>
+            </div>
+            
+            <div class="defense-card" onclick="deployDefense('silver')">
+                <h4>✨ 鍍銀內壁 (Silver)</h4>
+                <p>亮晶晶的鏡面，反射光線。</p>
+                <small style="color:purple;">防禦：輻射</small>
+            </div>
+
+            <div class="defense-card" onclick="deployDefense('stopper')">
+                <h4>🪵 軟木塞/塑膠蓋 (Stopper)</h4>
+                <p>蓋住瓶口，也是絕熱材質。</p>
+                <small style="color:var(--accent);">防禦：對流 (蒸發)、傳導</small>
+            </div>
+        </div>
+    </div>
+
+    <hr style="margin:20px 0; border:0; border-top:1px dashed #ccc;">
+
+    <div style="text-align:center;">
+        <h3>⚠️ 5-4 必考陷阱：誰冷得快？</h3>
+        <p>兩杯一樣熱的水，放在空氣中。哪一杯會先變冷？</p>
+        
+        <div class="trap-cups">
+            <div class="cup cup-black" onclick="checkCup('black')">
+                黑色杯
+                <div class="heat-waves" id="wave-black">
+                    <div class="wave"></div><div class="wave"></div><div class="wave"></div>
+                </div>
+            </div>
+            <div class="cup cup-white" onclick="checkCup('white')">
+                白色杯
+                <div class="heat-waves" id="wave-white">
+                    <div class="wave"></div><div class="wave"></div>
+                </div>
+            </div>
+        </div>
+        <div id="cup-feedback" style="margin-top:15px; font-weight:bold; height:30px;"></div>
+    </div>
+</div>
+
+<div class="overlay" id="overlay" onclick="closePopup()"></div>
+<div class="popup-msg" id="popup">
+    <h3 id="pop-title" style="margin-top:0;">標題</h3>
+    <p id="pop-desc">內容</p>
+    <button class="guide-action" onclick="closePopup()">OK</button>
+</div>
 
 <script>
-
-    // --- 考卷邏輯 ---
-
-    function selectQ(id) {
-
-        document.querySelectorAll('.question-block').forEach(el => el.classList.remove('active'));
-
-        document.getElementById('q'+id).classList.add('active');
-
-    }
-
-
-
-    function checkAns(el, isCorrect) {
-
-        // 清除該題其他選項樣式
-
-        let parent = el.parentElement;
-
-        Array.from(parent.children).forEach(child => {
-
-            child.classList.remove('selected', 'correct', 'wrong');
-
-        });
-
-
-
-        el.classList.add('selected');
-
-        
-
-        // 延遲顯示結果
-
-        setTimeout(() => {
-
-            if(isCorrect) {
-
-                el.classList.add('correct');
-
-            } else {
-
-                el.classList.add('wrong');
-
-                alert("再想一下！或者按「召喚實驗」看看原理？");
-
-            }
-
-        }, 300);
-
-    }
-
-
-
-    function openLab(id) {
-
-        document.getElementById('intro-screen').style.display = 'none';
-
-        document.querySelectorAll('.lab-scene').forEach(el => el.classList.remove('active'));
-
-        document.getElementById('lab-' + id).classList.add('active');
-
-    }
-
-
-
-    // --- 實驗 1: 熱傳導 ---
-
-    function simCond(type) {
-
-        const res = document.getElementById('cond-result');
-
-        if(type === 'metal') {
-
-            document.getElementById('arrow-metal').style.opacity = 1;
-
-            document.getElementById('arrow-wood').style.opacity = 0;
-
-            res.innerText = "金屬導熱超快！手上的熱馬上被吸走 -> 覺得冰！";
-
-        } else {
-
-            document.getElementById('arrow-metal').style.opacity = 0;
-
-            document.getElementById('arrow-wood').style.opacity = 1;
-
-            res.innerText = "木頭導熱慢，熱留在手上 -> 不覺得冰。";
-
-        }
-
-    }
-
-
-
-    // --- 實驗 2: 保溫瓶 ---
-
-    function toggleThermos(part) {
-
-        const msg = document.getElementById('thermos-msg');
-
-        if(part === 'vac') {
-
-            document.getElementById('t-vac').style.opacity = 1;
-
-            document.getElementById('arr-cond').style.opacity = 0.1;
-
-            document.getElementById('arr-conv').style.opacity = 0.1;
-
-            msg.innerHTML = "🛡️ 真空層：沒有空氣當介質<br>成功阻擋「傳導」與「對流」！";
-
-        } else if (part === 'sil') {
-
-            document.getElementById('t-sil').style.opacity = 1;
-
-            document.getElementById('arr-rad').style.opacity = 0.1;
-
-            msg.innerHTML = "✨ 鍍銀內壁：像鏡子一樣<br>成功反射「輻射」！";
-
-        } else if (part === 'cap') {
-
-            document.getElementById('t-cap').style.opacity = 1;
-
-            document.getElementById('arr-conv').style.opacity = 0; // 上方對流完全阻擋
-
-            msg.innerHTML = "🪵 瓶塞：蓋住瓶口<br>阻止熱氣上升流失 (對流)！";
-
-        }
-
-    }
-
-
-
-    // --- 實驗 3: 原子 ---
-
+    // --- STAGE 1 & 2: 原子邏輯 (維持) ---
     let p = 6, n = 6, e = 6;
+    const elements = { 1:'H', 2:'He', 3:'Li', 4:'Be', 5:'B', 6:'C', 7:'N', 8:'O', 9:'F', 10:'Ne', 11:'Na' };
 
-    const elements = {5:'B 硼', 6:'C 碳', 7:'N 氮', 11:'Na 鈉', 12:'Mg 鎂'};
+    function switchStage(id) {
+        document.querySelectorAll('.stage').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.nav-step').forEach(el => el.classList.remove('active'));
+        document.getElementById('stage-' + id).classList.add('active');
+        document.getElementById('nav-' + id).classList.add('active');
+    }
 
-
-
-    function modAtom(type, d) {
-
+    function updateAtom(type, delta) {
         let oldP = p;
+        if(type === 'p') p = Math.max(1, Math.min(11, p + delta));
+        if(type === 'n') n = Math.max(0, n + delta);
+        if(type === 'e') e = Math.max(0, e + delta);
 
-        if(type==='p') p = Math.max(1, p+d);
-
-        if(type==='n') n = Math.max(0, n+d);
-
-        if(type==='e') e = Math.max(0, e+d);
-
+        document.getElementById('ctrl-p').innerText = p;
+        document.getElementById('ctrl-n').innerText = n;
+        document.getElementById('ctrl-e').innerText = e;
         
+        document.getElementById('p-val-disp').innerText = p;
+        document.getElementById('n-val-disp').innerText = n;
+        document.getElementById('atomic-num-disp').innerText = p;
+        document.getElementById('mass-num-disp').innerText = p + n;
 
-        // 更新 UI
-
-        document.getElementById('txt-p').innerText = p;
-
-        document.getElementById('txt-n').innerText = n;
-
-        document.getElementById('txt-e').innerText = e;
-
-        document.getElementById('val-p').innerText = p;
-
-        document.getElementById('val-n').innerText = n;
-
-        
-
-        let name = elements[p] || "未知元素";
-
-        document.getElementById('atom-name').innerText = name;
-
-        document.getElementById('atom-iso').innerText = `質量數：${p+n}`;
-
-        
-
-        let charge = p-e;
-
-        let cText = charge===0 ? "電中性" : (charge>0 ? `陽離子 +${charge}` : `陰離子 ${charge}`);
-
-        document.getElementById('atom-ion').innerText = cText;
-
-
-
-        // 警告系統
-
-        const warn = document.getElementById('atom-warning');
+        let symbol = elements[p] || "X";
+        document.getElementById('element-symbol').innerText = symbol;
 
         if(type === 'p' && oldP !== p) {
-
-            warn.innerText = "⚠️ 警告：動到質子，元素變成別人了！";
-
-            document.getElementById('atom-nuc').style.transform = "translate(-50%, -50%) scale(1.2)";
-
-            setTimeout(()=>document.getElementById('atom-nuc').style.transform="translate(-50%, -50%) scale(1)", 200);
-
+            pulseNucleus();
+            showPopup("⚠️ 警告：身分改變！", "動到質子，元素就變了！質子是身分證！");
         } else if (type === 'n') {
-
-            warn.innerText = "提示：動中子只是變胖(同位素)，還是同一種元素喔。";
-
-        } else if (type === 'e') {
-
-            warn.innerText = "提示：動電子只是帶電(離子)，元素種類不變。";
-
-        } else {
-
-            warn.innerText = "";
-
+            pulseNucleus();
         }
-
-
-
-        renderElec();
-
+        renderElectrons();
     }
 
-
-
-    function renderElec() {
-
-        const c = document.getElementById('elec-con');
-
+    function renderElectrons() {
+        const c = document.getElementById('elec-container-1');
         c.innerHTML = '';
-
         let k = Math.min(e, 2);
-
-        let l = Math.max(0, e-2);
-
+        let l = Math.max(0, e - 2);
         for(let i=0; i<k; i++) {
-
-            let el = document.createElement('div'); el.className='electron';
-
-            let ang = i*180;
-
-            el.style.top = `calc(50% + ${60*Math.sin(ang)}px - 6px)`;
-
-            el.style.left = `calc(50% + ${60*Math.cos(ang)}px - 6px)`;
-
-            c.appendChild(el);
-
+            let d = document.createElement('div'); d.className='electron';
+            let a = i*180;
+            d.style.top = `calc(50% + ${60*Math.sin(a*Math.PI/180)}px - 7px)`;
+            d.style.left = `calc(50% + ${60*Math.cos(a*Math.PI/180)}px - 7px)`;
+            c.appendChild(d);
         }
-
         for(let i=0; i<l; i++) {
-
-            let el = document.createElement('div'); el.className='electron';
-
-            let ang = i*45;
-
-            el.style.top = `calc(50% + ${110*Math.sin(ang)}px - 6px)`;
-
-            el.style.left = `calc(50% + ${110*Math.cos(ang)}px - 6px)`;
-
-            c.appendChild(el);
-
+            let d = document.createElement('div'); d.className='electron';
+            let a = i*(360/Math.max(1,l));
+            d.style.top = `calc(50% + ${120*Math.sin(a*Math.PI/180)}px - 7px)`;
+            d.style.left = `calc(50% + ${120*Math.cos(a*Math.PI/180)}px - 7px)`;
+            c.appendChild(d);
         }
-
     }
 
-    
+    function pulseNucleus() {
+        const n = document.getElementById('nucleus-1');
+        n.classList.remove('pulse');
+        void n.offsetWidth;
+        n.classList.add('pulse');
+    }
 
-    renderElec();
+    function showTrap(type) {
+        if(type === 'p_iso') showPopup("❌ 錯誤", "加質子會變成氮(N)，就不是碳了！同位素只能改中子。");
+        if(type === 'n_iso') showPopup("✅ 正確", "太棒了！加中子 = 變胖 = 同位素。");
+        if(type === 'p_ion') showPopup("❌ 錯誤", "絕對不能動質子！那樣會變成別的元素(Mg)。");
+        if(type === 'e_ion') showPopup("✅ 正確", "沒錯！丟掉負債(電子)，你就帶正電了！");
+    }
 
+    // --- STAGE 3: 熱傳播邏輯 ---
+    function deployDefense(type) {
+        if(type === 'vacuum') {
+            document.getElementById('vis-vacuum').style.opacity = 1;
+            // 真空阻擋 傳導 + 對流 (簡化處理：主要擋傳導/對流)
+            document.getElementById('arrow-cond').style.display = 'none';
+            showPopup("🛡️ 真空層部署！", "太棒了！因為沒有介質(空氣)，<br>「傳導」和「對流」都無法發生了！");
+        }
+        if(type === 'silver') {
+            document.getElementById('vis-silver').style.opacity = 1;
+            // 鍍銀阻擋 輻射
+            document.getElementById('arrow-rad').style.display = 'none';
+            showPopup("✨ 鍍銀層部署！", "亮晶晶的表面把熱輻射「反射」回去了！<br>就像鏡子一樣！");
+        }
+        if(type === 'stopper') {
+            document.getElementById('vis-stopper').style.opacity = 1;
+            // 瓶塞主要阻擋 對流(上方)
+            document.getElementById('arrow-conv').style.display = 'none';
+            showPopup("🪵 瓶塞部署！", "蓋子擋住了熱空氣往上跑 (對流)，<br>也阻止了傳導 (因為軟木塞是不良導體)。");
+        }
+    }
+
+    function checkCup(color) {
+        if(color === 'black') {
+            document.getElementById('wave-black').style.opacity = 1;
+            document.getElementById('cup-feedback').innerText = "✅ 正確！黑色易吸熱，也易放熱(輻射強)。";
+            document.getElementById('cup-feedback').style.color = "green";
+        } else {
+            document.getElementById('wave-white').style.opacity = 0.5;
+            document.getElementById('cup-feedback').innerText = "❌ 錯了。白色/淺色不易吸熱，也不易放熱。";
+            document.getElementById('cup-feedback').style.color = "red";
+        }
+    }
+
+    function showPopup(title, msg) {
+        document.getElementById('pop-title').innerHTML = title;
+        document.getElementById('pop-desc').innerHTML = msg;
+        document.getElementById('popup').style.display = 'block';
+        document.getElementById('overlay').style.display = 'block';
+    }
+    function closePopup() {
+        document.getElementById('popup').style.display = 'none';
+        document.getElementById('overlay').style.display = 'none';
+    }
+
+    // Init
+    updateAtom('p', 0);
 </script>
-
 </body>
-
 </html>
