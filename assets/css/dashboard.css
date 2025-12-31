@@ -1,0 +1,114 @@
+/* 檔案路徑：assets/css/dashboard.css */
+
+:root {
+    /* 核心配色：科技深藍與霓虹光 */
+    --bg-deep: #0f172a;
+    --bg-card: rgba(30, 41, 59, 0.7);
+    --text-main: #e2e8f0;
+    --text-muted: #94a3b8;
+    --neon-blue: #38bdf8;
+    --neon-green: #4ade80;
+    --neon-purple: #c084fc;
+    --neon-orange: #fbbf24;
+    --border-glow: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+body {
+    font-family: 'Noto Sans TC', sans-serif;
+    background-color: var(--bg-deep);
+    background-image: 
+        linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    color: var(--text-main);
+    margin: 0;
+    padding-bottom: 50px;
+}
+
+/* 頂部導航 */
+header {
+    background: rgba(15, 23, 42, 0.9);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(56, 189, 248, 0.2);
+    padding: 15px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.brand-group { display: flex; align-items: center; gap: 15px; }
+.brand-logo {
+    font-family: monospace;
+    font-weight: 700;
+    font-size: 1.5rem;
+    color: var(--neon-blue);
+    text-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+}
+.brand-tag {
+    background: rgba(56, 189, 248, 0.1);
+    color: var(--neon-blue);
+    font-size: 0.75rem;
+    padding: 4px 8px;
+    border-radius: 4px;
+    border: 1px solid rgba(56, 189, 248, 0.3);
+}
+
+/* 數據儀表板 */
+.stats-bar { display: flex; gap: 20px; font-family: monospace; font-size: 0.85rem; }
+.stat-item { display: flex; flex-direction: column; align-items: flex-end; }
+.stat-label { color: var(--text-muted); font-size: 0.7rem; }
+.stat-value { color: var(--neon-green); font-weight: bold; }
+.status-dot { height: 8px; width: 8px; background-color: var(--neon-green); border-radius: 50%; display: inline-block; margin-right: 5px; box-shadow: 0 0 5px var(--neon-green); }
+
+/* 主容器 */
+.container { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
+
+/* 分區標題 */
+.section-header {
+    display: flex; align-items: center; margin: 50px 0 25px 0;
+    padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+.section-tag {
+    font-family: monospace;
+    background: linear-gradient(90deg, var(--neon-blue), transparent);
+    color: #0f172a; padding: 5px 15px; font-weight: bold; margin-right: 15px;
+    clip-path: polygon(0 0, 90% 0, 100% 100%, 0 100%);
+}
+.section-title { font-size: 1.2rem; color: var(--text-main); letter-spacing: 1px; }
+
+/* 卡片網格 */
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px; }
+
+/* 科技卡片 */
+.card {
+    background: var(--bg-card); border: var(--border-glow); border-radius: 12px;
+    padding: 25px; text-decoration: none; color: inherit; position: relative;
+    overflow: hidden; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(5px); display: flex; flex-direction: column; justify-content: space-between; height: 100%;
+}
+.card:hover { transform: translateY(-5px); background: rgba(30, 41, 59, 0.9); box-shadow: 0 0 20px rgba(56, 189, 248, 0.15); border-color: var(--neon-blue); }
+
+/* 卡片左側光條 */
+.card::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--neon-blue); opacity: 0.5; transition: 0.3s; }
+.card:hover::before { opacity: 1; box-shadow: 0 0 10px var(--neon-blue); }
+
+/* 科目顏色定義 */
+.card[data-type="bio"]::before { background: var(--neon-green); }
+.card[data-type="bio"]:hover { border-color: var(--neon-green); box-shadow: 0 0 20px rgba(74, 222, 128, 0.15); }
+.card[data-type="physics"]::before { background: var(--neon-purple); }
+.card[data-type="physics"]:hover { border-color: var(--neon-purple); box-shadow: 0 0 20px rgba(192, 132, 252, 0.15); }
+.card[data-type="writing"]::before { background: var(--neon-orange); }
+.card[data-type="writing"]:hover { border-color: var(--neon-orange); box-shadow: 0 0 20px rgba(251, 191, 36, 0.15); }
+
+/* 卡片內容 */
+.card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; }
+.card-icon { font-size: 2rem; filter: drop-shadow(0 0 5px rgba(255,255,255,0.3)); }
+.card-id { font-family: monospace; font-size: 0.8rem; color: var(--text-muted); border: 1px solid rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; }
+.card h3 { margin: 0 0 10px 0; font-size: 1.15rem; font-weight: 500; }
+.card p { font-size: 0.9rem; color: var(--text-muted); line-height: 1.6; margin: 0; }
+.badge { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; background: rgba(255,255,255,0.1); margin-top: 10px; }
+
+footer { text-align: center; margin-top: 60px; color: var(--text-muted); font-size: 0.8rem; font-family: monospace; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 20px; }

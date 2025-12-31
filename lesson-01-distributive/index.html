@@ -2,123 +2,111 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>自動化數學教材 - 分配律與湊整數</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>L01: 分配律圖像化 | STEM INSIGHT</title>
+    <link rel="stylesheet" href="../../assets/css/dashboard.css">
     <style>
-        :root {
-            --primary: #2c3e50;
-            --accent: #e74c3c;
-            --success: #27ae60;
-            --bg: #f4f7f6;
+        /* 覆蓋為數學專屬風格 (藍色系) */
+        body { background: #f4f6f8; background-image: none; color: #333; }
+        .container { max-width: 800px; margin-top: 30px; }
+        .lesson-nav { padding: 15px; background: white; border-radius: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; }
+        .back-link { text-decoration: none; color: #2980b9; font-weight: bold; }
+        
+        #app-container {
+            background: white; padding: 40px; border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            border-top: 5px solid #3498db; /* 數學藍 */
         }
-        body {
-            font-family: "Microsoft JhengHei", sans-serif;
-            background-color: var(--bg);
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            overflow: hidden;
+        
+        .action-btn { 
+            display: block; width: 100%; padding: 12px; background: #3498db; 
+            color: white; border: none; border-radius: 8px; cursor: pointer; 
+            font-size: 1rem; margin-top: 10px;
         }
-        .slide-container {
-            width: 800px;
-            height: 500px;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            position: relative;
-            padding: 40px;
-        }
-        .slide {
-            display: none;
-            animation: fadeIn 0.8s ease-out forwards;
-        }
-        .active { display: block; }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        h1 { color: var(--primary); border-bottom: 4px solid var(--accent); display: inline-block; }
-        .equation { font-size: 3rem; font-weight: bold; text-align: center; margin: 50px 0; color: #34495e; }
-        .highlight { color: var(--accent); }
-        .hidden-one { color: rgba(231, 76, 60, 0); transition: color 1s; font-weight: bold; }
-        .reveal-one { color: rgba(231, 76, 60, 1); }
-
-        .icon-box { display: flex; justify-content: space-around; font-size: 4rem; margin-top: 20px; }
-        .note { background: #fff3cd; padding: 15px; border-radius: 10px; font-size: 1.2rem; margin-top: 20px; border-left: 5px solid #ffc107; }
-
-        .btn-nav { position: absolute; bottom: 20px; right: 20px; }
-        button { padding: 10px 20px; cursor: pointer; background: var(--primary); color: white; border: none; border-radius: 5px; }
     </style>
 </head>
 <body>
 
-<div class="slide-container">
-    <div class="slide active" id="s1">
-        <h1>🚀 高手秒殺題</h1>
-        <div class="equation">125 × 3.14 × 8 = <span id="ans1">?</span></div>
-        <p class="note">還在從左往右算嗎？先找「好朋友」只要 3 秒鐘！</p>
-    </div>
-
-    <div class="slide" id="s2">
-        <h1>🍔 麥當勞分配律</h1>
-        <div class="equation">(🍔 + 🍟) × 8</div>
-        <div class="icon-box">➡️ 🍔×8 + 🍟×8</div>
-        <div class="note">公式：a × (b + c) = a×b + a×c<br>括號外的每個人都要發到獎金！</div>
-    </div>
-
-    <div class="slide" id="s3">
-        <h1>🤝 數字好朋友排行榜</h1>
-        <div class="equation" style="font-size: 2.5rem;">
-            <span class="highlight">25 × 4 = 100</span><br>
-            <span class="highlight">125 × 8 = 1000</span><br>
-            <span style="color:var(--success)">5 × 偶數 = 10的倍數</span>
+    <div class="container">
+        <div class="lesson-nav">
+            <a href="../../index.html" class="back-link">⬅ 回到戰情室</a>
+            <div style="font-weight: bold; color: #2980b9;">LESSON 01: MATH</div>
         </div>
-        <p class="note">看到這些組合，先讓他們「合體」！</p>
+
+        <div id="app-container"></div>
+
+        <div style="margin-top: 20px; text-align: right;">
+            <button id="next-step-btn" class="action-btn" style="width: auto;">下一步 ➡</button>
+        </div>
     </div>
 
-    <div class="slide" id="s4">
-        <h1>🕵️‍♂️ 隱形的「1」</h1>
-        <div class="equation">99 × 99 + 99 <span class="hidden-one" id="one">× 1</span></div>
-        <div class="note">提取公因數：99 × (99 + 1) = <span class="highlight">9900</span></div>
-        <button onclick="revealOne()" style="margin-top:10px">戴上特務眼鏡</button>
-    </div>
+    <script>
+        const lessonData = {
+            id: "math_01_distributive",
+            title: "分配律圖像化",
+            steps: [
+                {
+                    type: "intro",
+                    title: "觀念導入：麥當勞套餐",
+                    content: "<p>分配律常常讓同學搞混，我們用買套餐的概念來想。</p><p>假設一份套餐有：(🍔 漢堡 + 🍟 薯條)</p>"
+                },
+                {
+                    type: "visual_concept",
+                    title: "圖像拆解",
+                    icon: "🍔🍟 x 3",
+                    description: "如果你買了 <strong>3</strong> 份套餐，那就是：<br>3 × (🍔 + 🍟) = <strong>3個🍔 + 3個🍟</strong><br>這就是分配律：外面的數字要乘給裡面的每一個！"
+                },
+                {
+                    type: "step_solver",
+                    title: "牛刀小試",
+                    question: "請利用分配律計算： 5 × (100 + 2)",
+                    prefix: "答案：",
+                    answer: "510",
+                    hint: "變成 5x100 + 5x2 = 500 + 10"
+                },
+                {
+                    type: "interactive_quiz",
+                    title: "觀念檢測",
+                    question: "下列哪一個式子是錯誤的？",
+                    options: [
+                        "2(a+b) = 2a + 2b",
+                        "3(x-y) = 3x - 3y",
+                        "-(a-b) = -a - b" // 錯誤選項
+                    ],
+                    correctIdx: 2
+                }
+            ]
+        };
+    </script>
 
-    <div class="btn-nav">
-        <button onclick="prevSlide()">上一步</button>
-        <button onclick="nextSlide()">下一步</button>
-    </div>
-</div>
+    <script src="../../assets/js/renderers/math-renderer.js"></script>
 
-<script>
-    let currentSlide = 1;
-    const totalSlides = 4;
+    <script>
+        let currentStepIndex = 0;
+        const container = document.getElementById('app-container');
+        const nextBtn = document.getElementById('next-step-btn');
 
-    function showSlide(n) {
-        document.querySelectorAll('.slide').forEach(s => s.classList.remove('active'));
-        document.getElementById('s' + n).classList.add('active');
-    }
-
-    function nextSlide() {
-        if (currentSlide < totalSlides) {
-            currentSlide++;
-            showSlide(currentSlide);
+        function loadStep(index) {
+            if (index >= lessonData.steps.length) {
+                alert("單元完成！");
+                return;
+            }
+            MathRenderer.renderStep(lessonData.steps[index], container);
+            
+            if (index === lessonData.steps.length - 1) {
+                nextBtn.innerText = "完成課程 ✅";
+                nextBtn.style.background = "#27ae60";
+            }
         }
-    }
 
-    function prevSlide() {
-        if (currentSlide > 1) {
-            currentSlide--;
-            showSlide(currentSlide);
-        }
-    }
+        nextBtn.onclick = () => {
+            currentStepIndex++;
+            if(currentStepIndex < lessonData.steps.length) {
+                loadStep(currentStepIndex);
+            }
+        };
 
-    function revealOne() {
-        document.getElementById('one').classList.add('reveal-one');
-    }
-</script>
-
+        loadStep(0);
+    </script>
 </body>
 </html>

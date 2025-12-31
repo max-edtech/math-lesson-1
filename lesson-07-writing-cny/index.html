@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>L07: 創意寫作-獨特新年 | STEM INSIGHT</title>
+    <link rel="stylesheet" href="../../assets/css/dashboard.css">
+    
+    <style>
+        /* 課程專屬樣式 */
+        body {
+            background: #fff8f0; /* 溫暖的米色背景 */
+            color: #333;
+            background-image: none;
+        }
+        
+        .container { max-width: 900px; margin-top: 30px; }
+
+        /* 導航列 */
+        .lesson-nav {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 15px 25px; background: white; border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 30px;
+        }
+        .back-link { text-decoration: none; color: #555; font-weight: bold; display: flex; align-items: center; gap: 5px; }
+        .back-link:hover { color: #d35400; }
+
+        /* 主內容區塊 */
+        #app-container {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            border-top: 5px solid #ff6b6b; /* 新年紅 */
+            min-height: 500px;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        /* 通用元件樣式 */
+        .lesson-step-title { color: #d35400; border-bottom: 2px solid #ffeaa7; padding-bottom: 15px; margin-bottom: 25px; }
+        
+        .sense-result-box {
+            font-size: 2.5rem; font-weight: bold; color: #c0392b;
+            text-align: center; margin: 30px 0; padding: 30px;
+            border: 3px dashed #e17055; border-radius: 15px; background: #fff5f5;
+        }
+        .sense-result-box.highlight { transform: scale(1.05); transition: 0.3s; background: #ffeaa7; border-style: solid; }
+
+        .action-btn {
+            display: block; width: 100%; padding: 15px; font-size: 1.1rem;
+            background: linear-gradient(135deg, #ff7675, #d63031);
+            color: white; border: none; border-radius: 10px; cursor: pointer;
+            box-shadow: 0 4px 10px rgba(214, 48, 49, 0.3); transition: 0.2s; font-weight: bold;
+        }
+        .action-btn:hover { filter: brightness(1.1); }
+        .action-btn:active { transform: scale(0.98); }
+
+        .student-input {
+            width: 100%; padding: 15px; border: 2px solid #eee;
+            border-radius: 10px; font-size: 1rem; margin-top: 10px; resize: vertical;
+            font-family: 'Noto Sans TC', sans-serif;
+            transition: 0.2s;
+        }
+        .student-input:focus { outline: none; border-color: #ff7675; background: #fffdf9; }
+
+        .budget-display { font-size: 1.2rem; font-weight: bold; color: #2d3436; margin: 15px 0; padding: 20px; background: #dfe6e9; border-radius: 8px; }
+        .input-group { display: flex; gap: 10px; margin-bottom: 20px; }
+        .input-text { flex: 2; padding: 12px; border-radius: 8px; border: 1px solid #ddd; }
+        .input-num { flex: 1; padding: 12px; border-radius: 8px; border: 1px solid #ddd; }
+        .add-btn { background: #00b894; color: white; border: none; padding: 0 25px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        .budget-list { list-style: none; padding: 0; margin-top: 20px; }
+        .budget-list li { display: flex; justify-content: space-between; padding: 12px; border-bottom: 1px solid #eee; }
+
+        .controls { margin-top: 30px; display: flex; justify-content: space-between; border-top: 1px solid #eee; padding-top: 20px; }
+        .next-btn {
+            padding: 12px 40px; background: #0984e3; color: white; border: none;
+            border-radius: 30px; font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; gap: 8px;
+            box-shadow: 0 4px 10px rgba(9, 132, 227, 0.3);
+        }
+        .next-btn:hover { background: #74b9ff; transform: translateY(-2px); }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="lesson-nav">
+            <a href="../../index.html" class="back-link">⬅ 回到戰情室</a>
+            <div style="font-weight: bold; color: #d35400; font-size: 1.1rem;">LESSON 07: 創意寫作 (混齡特訓版)</div>
+        </div>
+
+        <div id="app-container">
+            </div>
+
+        <div class="controls">
+            <span id="step-indicator" style="color:#888; display:flex; align-items:center;">進度：1 / 6</span>
+            <button id="next-step-btn" class="next-btn">下一步 ➡</button>
+        </div>
+    </div>
+
+    <script>
+        const lessonData = {
+            id: "cny_writing_full",
+            title: "我的獨特新年 (2小時特訓版)",
+            steps: [
+                {
+                    type: "intro",
+                    title: "👋 歡迎來到寫作戰鬥營",
+                    content: `
+                        <p>今天這堂課，我們要挑戰把「過年流水帳」變成「高分作文」。</p>
+                        <ul style="background:#fef9e7; padding:20px 40px; border-radius:10px; border-left:5px solid #f1c40f;">
+                            <li style="margin-bottom:10px;"><strong>🎯 五年級目標：</strong>消滅「然後、覺得、很高興」，學會用畫面說話。</li>
+                            <li><strong>🎯 七年級目標：</strong>不只寫熱鬧，還要寫出「觀點」與「反思」。</li>
+                        </ul>
+                        <p>準備好了嗎？點擊下一步開始暖身！</p>
+                    `
+                },
+                {
+                    type: "game_random_sense",
+                    title: "暖身：五感雷達啟動",
+                    instruction: "寫作的第一步是「觀察」。抽一個感官，分享你在過年期間的觀察。",
+                    options: [
+                        "👀 視覺：滿桌的紅色、發霉的年糕、親戚的假髮(?)", 
+                        "👂 聽覺：麻將洗牌聲、鞭炮聲、親戚的問候攻勢", 
+                        "👃 嗅覺：拜拜的線香、火鍋的熱氣、新衣服的味道", 
+                        "👅 味覺：年糕的甜膩、長年菜的苦澀、瓜子的鹹味", 
+                        "🖐 觸覺：紅包的厚度、洗碗水的冰冷、黏黏的糖果紙"
+                    ]
+                },
+                {
+                    type: "sentence_surgery",
+                    title: "特訓一：句子整容院",
+                    description: "為什麼作文分數不高？因為我們常寫「流水帳」。來看看如何把枯燥的句子變身！",
+                    badExample: "今天除夕夜，我們全家一起吃火鍋，我覺得很開心。",
+                    goodExample: "除夕夜，圓桌中央的<strong>火鍋冒著白煙</strong>，伴隨著<strong>咕嚕咕嚕</strong>的滾沸聲。全家人圍坐在一起，雖然窗外寒風刺骨，但我的心裡卻像那鍋湯一樣，<strong>暖烘烘的</strong>。",
+                    practicePrompt: "請修改這句：『我拿到紅包，很高興地跟阿嬤說謝謝。』"
+                },
+                {
+                    type: "interactive_budget",
+                    title: "特訓二：紅包規劃師 & 價值思辨",
+                    instruction: "恭喜獲得虛擬紅包一萬元！小五請規劃用途；國七請思考這筆錢背後的「人情世故」。",
+                    budget: 10000
+                },
+                {
+                    type: "topic_selector",
+                    title: "特訓三：寫作分流 (核心段落)",
+                    choices: [
+                        {
+                            level: "五年級 (描述力)",
+                            title: "鏡頭下的年夜飯",
+                            color: "#27ae60",
+                            desc: "選擇一道菜或一個時刻，用「五感」做特寫。",
+                            guides: [
+                                "🔍 <strong>特寫鏡頭：</strong>那道菜看起來像什麼？(冒著煙？油亮亮？)",
+                                "😋 <strong>味覺描寫：</strong>吃下去的口感？(入口即化？)",
+                                "🚫 <strong>禁忌：</strong>不要從早上寫到晚上，只寫這頓飯！"
+                            ]
+                        },
+                        {
+                            level: "七年級 (思辨力)",
+                            title: "熱鬧後的冷思考",
+                            color: "#d35400",
+                            desc: "探討過年習俗的變化，或表面熱鬧下的真實感受。",
+                            guides: [
+                                "⚖️ <strong>對比法：</strong>小時候單純的期待 vs 現在的社交壓力。",
+                                "📱 <strong>社會觀察：</strong>科技如何改變了圍爐？(大家都在滑手機?)",
+                                "🧠 <strong>核心觀點：</strong>你認為「年味」變淡了嗎？為什麼？"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    type: "guided_writing",
+                    title: "總結：新年新希望 (豹尾)",
+                    prompt: "文章的最後，請給自己一個具體的目標 (不要寫「學業進步」這種空話)。國七請嘗試呼應開頭的觀點。",
+                    placeholder: "新的一年，我不求事事順利，只希望在面對困難時，能像...",
+                    minChars: 50
+                },
+                {
+                    type: "intro",
+                    title: "🎉 課程完成",
+                    content: "<h3>太棒了！</h3><p>你已經完成了素材蒐集與大綱構思。現在，請將剛剛寫的內容整理到稿紙或 Word 上，完成你的大作吧！</p>"
+                }
+            ]
+        };
+    </script>
+
+    <script src="../../assets/js/renderers/writing-renderer.js"></script>
+
+    <script>
+        let currentStepIndex = 0;
+        const container = document.getElementById('app-container');
+        const nextBtn = document.getElementById('next-step-btn');
+        const stepIndicator = document.getElementById('step-indicator');
+
+        function loadStep(index) {
+            if (index >= lessonData.steps.length) {
+                alert("課程結束！");
+                return;
+            }
+            // 渲染內容
+            WritingRenderer.renderStep(lessonData.steps[index], container);
+            
+            // 更新進度條
+            stepIndicator.innerText = `進度：${index + 1} / ${lessonData.steps.length}`;
+
+            // 更新按鈕狀態
+            if (index === lessonData.steps.length - 1) {
+                nextBtn.innerText = "完成課程 ✅";
+                nextBtn.style.background = "#27ae60";
+            } else {
+                nextBtn.innerText = "下一步 ➡";
+                nextBtn.style.background = "#0984e3";
+            }
+            
+            // 捲動到頂部
+            window.scrollTo(0, 0);
+        }
+
+        nextBtn.onclick = () => {
+            currentStepIndex++;
+            if(currentStepIndex < lessonData.steps.length) {
+                loadStep(currentStepIndex);
+            } else {
+                alert("恭喜完成！記得存檔喔！");
+            }
+        };
+
+        // 啟動
+        loadStep(0);
+    </script>
+</body>
+</html>
